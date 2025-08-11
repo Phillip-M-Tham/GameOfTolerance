@@ -3,15 +3,24 @@
 #   Based on num players generate the number of deck of cards
 #int[] for deck of cards
 #Tracker for current round int CurrentRound
+#
+# Class objects for
+#  1. The players
+#     a. Every player has a name
+#     b. Every player has funds
+#     c. Every player has an assigned seat
+#  2. The Game
+#     a. Every game has rounds
+#     b. Every game has a
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
     userinput = input()
-    try:
+    try:#try catch to cast user input string to int
         numOfPlayers = int(userinput)
     except ValueError:
         print("Invalid input, please enter a number")
         initdecks()
-    if numOfPlayers > 10 or numOfPlayers <= 1:
+    if numOfPlayers > 10 or numOfPlayers <= 1: #check if user put in valid numbers if cast was successful
         print("Invalid input, please enter a valid number between 2 and 10")
         initdecks()
     print("number of players is "+str(numOfPlayers))
