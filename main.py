@@ -3,6 +3,23 @@
 #   Based on num players generate the number of deck of cards
 #int[] for deck of cards
 #Tracker for current round int CurrentRound
+def initdecks():
+    print("please enter how many players, max players is 10") #cap 2 decks for meow
+    userinput = input()
+    try:
+        numOfPlayers = int(userinput)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        initdecks()
+    if numOfPlayers > 10 or numOfPlayers <= 1:
+        print("Invalid input, please enter a valid number between 2 and 10")
+        initdecks()
+    print("number of players is "+str(numOfPlayers))
+
+def startGame():
+    initdecks()
+    #playrounds()
+
 def printRules():
     print("Welcome to the game of tolerance")
     print()
@@ -41,7 +58,7 @@ def main():
     x = input()
     if x =="1":
         print ("User choose 1")
-        main()#WE WILL UPDATE THIS TO A FUNCTION THAT RUNS THE GAME
+        startGame()#WE WILL UPDATE THIS TO A FUNCTION THAT RUNS THE GAME
     elif x =="2":
         printRules()
         main()
