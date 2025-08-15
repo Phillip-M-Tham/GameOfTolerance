@@ -1,3 +1,4 @@
+import math
 #Number of players int NumPlayers
 #   ask player how many players to supply NumPlayers
 #   Based on num players generate the number of deck of cards
@@ -7,11 +8,33 @@
 # Class objects for
 #  1. The players
 #     a. Every player has a name
-#     b. Every player has funds
+#     b. Every player has Totalfunds
 #     c. Every player has an assigned seat
+#     d. Every player has a point tracker
+#     e. Every player has a currentToleranceNumber
+#        -Can be determined if they choose to roll or not
+#     f. Players have the ability to roll the dice during rolling phase
+#     h. Players have the ability to check, call, raise or fold during betting phase
+#     i. Every player has an age to determine who is the eldest
 #  2. The Game
 #     a. Every game has rounds
-#     b. Every game has a
+#     b. Every game has a designated Starter
+#     c. Every game has two dice to access
+#     d. Every game has a deck of cards TBD by number of players
+#     e. Every game has a game ID (GID)
+#     f. Every game has a current pot tracker
+#     g. Every round has:
+#        I. shuffle cards phase
+#       II. Dealing 2 cards to each player phase
+#      III. Blind Bet phase
+#       IV. Player Card Reveal Phase
+#        V. Betting phase
+#       VI. Rolling phase
+#  3. Deck of Cards
+#  4. The Dice
+#class Deck:
+#    deckOfCards =[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48.49,50,51]
+
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
     userinput = input()
@@ -24,6 +47,8 @@ def initdecks():
         print("Invalid input, please enter a valid number between 2 and 10")
         initdecks()
     print("number of players is "+str(numOfPlayers))
+    decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
+    print("Number of decks is "+str(decksNeeded))
 
 def startGame():
     initdecks()
