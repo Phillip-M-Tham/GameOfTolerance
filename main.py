@@ -5,7 +5,7 @@ import math
 #int[] for deck of cards
 #Tracker for current round int CurrentRound
 #
-# Class objects for
+#
 #  1. The players
 #     a. Every player has a name
 #     b. Every player has Totalfunds
@@ -31,9 +31,12 @@ import math
 #        V. Betting phase
 #       VI. Rolling phase
 #  3. Deck of Cards
+#       A list that is determined by number of players
 #  4. The Dice
-#class Deck:
-#    deckOfCards =[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48.49,50,51]
+def createDecks(numberOfDecks):
+    deck_list = [i % 52 for i in range(numberOfDecks * 52)]
+
+
 def printDeck(deckOfCards, numberOfCards):
      suites = ["clubs", "diamonds", "hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
@@ -45,7 +48,6 @@ def printDeck(deckOfCards, numberOfCards):
                 print(f"{value} of {suit}")
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
-        #print(values[int(cards)%13]+" of "+ suites[int(cards)//13])
 
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
@@ -63,7 +65,8 @@ def initdecks():
     print("Number of decks is "+str(decksNeeded))
     cardsNeeded = decksNeeded * 52
     print("Number of cards is "+str(cardsNeeded))
-    totalCardsList = list(range(cardsNeeded))
+    #createDecks(decksNeeded)
+    totalCardsList = [i % 52 for i in range(cardsNeeded)]
     printDeck(totalCardsList, cardsNeeded)
     return totalCardsList
 
