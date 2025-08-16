@@ -34,6 +34,18 @@ import math
 #  4. The Dice
 #class Deck:
 #    deckOfCards =[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48.49,50,51]
+def printDeck(deckOfCards, numberOfCards):
+     suites = ["clubs", "diamonds", "hearts", "Spades"]
+     values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
+     for cards in deckOfCards:
+        if cards < numberOfCards:
+            value = values[cards %13]
+            suit = suites[cards//13]
+            if 0 <= len(suites):
+                print(f"{value} of {suit}")
+            else:
+                print(f"IndexError for card {cards}: suit index {suit}")
+        #print(values[int(cards)%13]+" of "+ suites[int(cards)//13])
 
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
@@ -49,9 +61,15 @@ def initdecks():
     print("number of players is "+str(numOfPlayers))
     decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
     print("Number of decks is "+str(decksNeeded))
+    cardsNeeded = decksNeeded * 52
+    print("Number of cards is "+str(cardsNeeded))
+    totalCardsList = list(range(cardsNeeded))
+    printDeck(totalCardsList, cardsNeeded)
+    return totalCardsList
 
 def startGame():
-    initdecks()
+    theCards = initdecks()
+    
     #playrounds()
 
 def printRules():
