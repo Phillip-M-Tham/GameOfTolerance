@@ -33,9 +33,23 @@ import math
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def playGame(ListofCards,ListofPlayers):
+    pass
+
 class Player:
     def __init__(self,Name,DateOfBirth):
+        self.Name = Name
+        self.DateOfBirth = DateOfBirth
+        CurrentTolerance = -1
+        CurrentPoints = 0
+        CurrentFunds = 0
+        IsEldest = False
+    
+    def RollPhase():
         pass
+    def BettingPhase():
+        pass
+
 def printDeck(deckOfCards, numberOfCards):
      suites = ["clubs", "diamonds", "hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
@@ -49,9 +63,15 @@ def printDeck(deckOfCards, numberOfCards):
                 print(f"IndexError for card {cards}: suit index {suit}")
 
 def initPlayers(playerCount):
+    players = []
     for number in range(playerCount):
-        print("enter name")
-        print("Enter date of birth")
+        print("Enter name")
+        temp_name = input()
+        print("Enter age")
+        temp_age = input()
+        person= Player(temp_name, temp_age)
+        players.append(person)
+    return players
 
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
@@ -75,8 +95,8 @@ def initdecks():
 
 def startGame():
     theCards, numberOfPlayers = initdecks()
-    initPlayers(numberOfPlayers)
-    #playrounds()
+    thePlayers = initPlayers(numberOfPlayers)
+    playGame(theCards, thePlayers)
 
 def printRules():
     print("Welcome to the game of tolerance")
