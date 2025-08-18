@@ -1,23 +1,81 @@
+import math
 #Number of players int NumPlayers
 #   ask player how many players to supply NumPlayers
 #   Based on num players generate the number of deck of cards
 #int[] for deck of cards
 #Tracker for current round int CurrentRound
+#
+#
+#  1. The players
+#     a. Every player has a name
+#     b. Every player has Totalfunds
+#     c. Every player has an assigned seat
+#     d. Every player has a point tracker
+#     e. Every player has a currentToleranceNumber
+#        -Can be determined if they choose to roll or not
+#     f. Players have the ability to roll the dice during rolling phase
+#     h. Players have the ability to check, call, raise or fold during betting phase
+#     i. Every player has an age to determine who is the eldest
+#  2. The Game
+#     a. Every game has rounds
+#     b. Every game has a designated Starter
+#     c. Every game has two dice to access
+#     d. Every game has a deck of cards TBD by number of players
+#     e. Every game has a game ID (GID)
+#     f. Every game has a current pot tracker
+#     g. Every round has:
+#        I. shuffle cards phase
+#       II. Dealing 2 cards to each player phase
+#      III. Blind Bet phase
+#       IV. Player Card Reveal Phase
+#        V. Betting phase
+#       VI. Rolling phase
+#  3. Deck of Cards
+#       A list that is determined by number of players
+#  4. The Dice
+class Player:
+    def __init__(self,Name,DateOfBirth):
+        pass
+def printDeck(deckOfCards, numberOfCards):
+     suites = ["clubs", "diamonds", "hearts", "Spades"]
+     values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
+     for cards in deckOfCards:
+        if cards < numberOfCards:
+            value = values[cards %13]
+            suit = suites[cards//13]
+            if 0 <= len(suites):
+                print(f"{value} of {suit}")
+            else:
+                print(f"IndexError for card {cards}: suit index {suit}")
+
+def initPlayers(playerCount):
+    for number in range(playerCount):
+        print("enter name")
+        print("Enter date of birth")
+
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
     userinput = input()
-    try:
+    try:#try catch to cast user input string to int
         numOfPlayers = int(userinput)
     except ValueError:
         print("Invalid input, please enter a number")
         initdecks()
-    if numOfPlayers > 10 or numOfPlayers <= 1:
+    if numOfPlayers > 10 or numOfPlayers <= 1: #check if user put in valid numbers if cast was successful
         print("Invalid input, please enter a valid number between 2 and 10")
         initdecks()
     print("number of players is "+str(numOfPlayers))
+    decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
+    print("Number of decks is "+str(decksNeeded))
+    cardsNeeded = decksNeeded * 52
+    print("Number of cards is "+str(cardsNeeded))
+    totalCardsList = [i % 52 for i in range(cardsNeeded)] # creates the list but in loop 0-51 based on how many decks are in use to represent 52 cards per deck
+    printDeck(totalCardsList, cardsNeeded)
+    return totalCardsList, numOfPlayers
 
 def startGame():
-    initdecks()
+    theCards, numberOfPlayers = initdecks()
+    initPlayers(numberOfPlayers)
     #playrounds()
 
 def printRules():
