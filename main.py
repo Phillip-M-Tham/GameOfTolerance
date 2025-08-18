@@ -1,4 +1,6 @@
 import math
+import random
+import time
 #Number of players int NumPlayers
 #   ask player how many players to supply NumPlayers
 #   Based on num players generate the number of deck of cards
@@ -33,13 +35,33 @@ import math
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def shuffleDeck(cards):
+    current_time = time.time()
+    random.seed(current_time)
+    random.shuffle(cards)
+    printDeck(cards, len(cards))
+    return cards
+
+def findEldest(players):
+    players.sort(key=lambda Player: Player.Age)
+    eldest_Player = players[-1]
+    eldest_Player.IsEldest = True
+    print("Eldest player is "+eldest_Player.Name)
+    return players
+
 def playGame(ListofCards,ListofPlayers):
-    pass
+    ListofPlayers =findEldest(ListofPlayers)
+    ListofCards =shuffleDeck(ListofCards)
+
+class Dice:
+    def __init__(self):
+        diceOne = [1,2,3,4,5,6]
+        diceTwo = [1,2,3,4,5,6]
 
 class Player:
-    def __init__(self,Name,DateOfBirth):
+    def __init__(self,Name,Age):
         self.Name = Name
-        self.DateOfBirth = DateOfBirth
+        self.Age = Age
         CurrentTolerance = -1
         CurrentPoints = 0
         CurrentFunds = 0
