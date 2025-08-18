@@ -33,10 +33,9 @@ import math
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
-def createDecks(numberOfDecks):
-    deck_list = [i % 52 for i in range(numberOfDecks * 52)]
-
-
+class Player:
+    def __init__(self,Name,DateOfBirth):
+        pass
 def printDeck(deckOfCards, numberOfCards):
      suites = ["clubs", "diamonds", "hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
@@ -48,6 +47,11 @@ def printDeck(deckOfCards, numberOfCards):
                 print(f"{value} of {suit}")
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
+
+def initPlayers(playerCount):
+    for number in range(playerCount):
+        print("enter name")
+        print("Enter date of birth")
 
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
@@ -65,14 +69,13 @@ def initdecks():
     print("Number of decks is "+str(decksNeeded))
     cardsNeeded = decksNeeded * 52
     print("Number of cards is "+str(cardsNeeded))
-    #createDecks(decksNeeded)
-    totalCardsList = [i % 52 for i in range(cardsNeeded)]
+    totalCardsList = [i % 52 for i in range(cardsNeeded)] # creates the list but in loop 0-51 based on how many decks are in use to represent 52 cards per deck
     printDeck(totalCardsList, cardsNeeded)
-    return totalCardsList
+    return totalCardsList, numOfPlayers
 
 def startGame():
-    theCards = initdecks()
-    
+    theCards, numberOfPlayers = initdecks()
+    initPlayers(numberOfPlayers)
     #playrounds()
 
 def printRules():
