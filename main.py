@@ -35,13 +35,15 @@ import time
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+
+
 def shuffleDeck(cards):
     current_time = time.time()
     random.seed(current_time)
     random.shuffle(cards)
     printDeck(cards, len(cards))
     return cards
-
+#This does not take into account for ties
 def findEldest(players):
     players.sort(key=lambda Player: Player.Age)
     eldest_Player = players[-1]
@@ -49,23 +51,24 @@ def findEldest(players):
     print("Eldest player is "+eldest_Player.Name)
     return players
 
-def playGame(ListofCards,ListofPlayers):
+def playGame(ListofCards,ListofPlayers,Dice):
     ListofPlayers =findEldest(ListofPlayers)
     ListofCards =shuffleDeck(ListofCards)
+    rollDice(Dice)
 
 class Dice:
     def __init__(self):
-        diceOne = [1,2,3,4,5,6]
-        diceTwo = [1,2,3,4,5,6]
+        self.diceOne = [1,2,3,4,5,6]
+        self.diceTwo = [1,2,3,4,5,6]
 
 class Player:
     def __init__(self,Name,Age):
         self.Name = Name
         self.Age = Age
-        CurrentTolerance = -1
-        CurrentPoints = 0
-        CurrentFunds = 0
-        IsEldest = False
+        self.CurrentTolerance = -1
+        self.CurrentPoints = 0
+        self.CurrentFunds = 0
+        self.IsEldest = False
     
     def RollPhase():
         pass
@@ -83,6 +86,17 @@ def printDeck(deckOfCards, numberOfCards):
                 print(f"{value} of {suit}")
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
+
+def rollDice(dice):
+    current_time = time.time()
+    random.seed(current_time)
+    pickedSideOne = random.choice(dice.diceOne)
+    pickedSideTwo = random.choice(dice.diceTwo)
+    print(f"Rolled dice one: {pickedSideOne} dice two: {pickedSideTwo}")
+
+def initDice():
+    theDice = Dice()
+    return theDice
 
 def initPlayers(playerCount):
     players = []
@@ -118,7 +132,8 @@ def initdecks():
 def startGame():
     theCards, numberOfPlayers = initdecks()
     thePlayers = initPlayers(numberOfPlayers)
-    playGame(theCards, thePlayers)
+    theDice = initDice()
+    playGame(theCards, thePlayers, theDice)
 
 def printRules():
     print("Welcome to the game of tolerance")
