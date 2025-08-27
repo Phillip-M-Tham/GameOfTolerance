@@ -35,9 +35,16 @@ import time
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
-def startRound(roundNumber,seatedPlayers,cards,dice):
+def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
+    print(f"Welcome to round "+str(roundNumber))
     if roundNumber == 1:
-        print(f"Welcome to round "+str(roundNumber))
+        #startingIndex = len(seatedPlayers)-1
+        print(f"Number of players is "+str(len(seatedPlayers)))
+        print(f"Starting Index is "+str(currentDealerIndex))
+        for player in range(currentDealerIndex, -1, -1):
+            activePlayer = seatedPlayers[player]
+            print("Is player "+activePlayer.Name+" ready. Press any button to continue")
+            input()
     else:
         pass
 
@@ -56,13 +63,13 @@ def findEldest(players):
     return players
 
 def playGame(ListofCards,ListofPlayers,Dice):
-    currentRound=1
+    roundNumber =1
     ListofPlayers =findEldest(ListofPlayers)
     ListofCards =shuffleDeck(ListofCards)
     #rollDice(Dice)
     #initGame = Game(ListofPlayers,ListofCards,Dice)
     #ListofCards = initGame.ShuffleCards(ListofCards)
-    startRound(currentRound,ListofPlayers,ListofCards,Dice)
+    startRound(roundNumber,ListofPlayers,ListofCards,Dice,len(ListofPlayers)-1)
 
 class Game:
     def __init__(self,players,cards,dice):
