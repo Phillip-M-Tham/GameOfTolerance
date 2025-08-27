@@ -35,6 +35,28 @@ import time
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def printCard(theCard):
+    suites = ["clubs", "diamonds", "hearts", "Spades"]
+    values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
+    suit = suites[theCard//13]
+    value = values[theCard%13]
+    print(f"{value} of {suit}")
+
+def dealCards(theCards, thePlayers, CurrentIndex):
+    ActiveDeck = theCards
+    cardIndex=0
+    #for loop that iterates through the shuffled deck starting at the beggining and copies the shuffled deck to a temp deck that removes the "dealt" cards and returns the deck to be played and populates each players class card one and two to populate
+    for playerIndex in range(0,len(thePlayers)):
+        currentIndex = (CurrentIndex + playerIndex) % len(thePlayers)
+        activePlayer = thePlayers[currentIndex]
+        activePlayer.CurrentCardOne = ActiveDeck[cardIndex]
+        ActiveDeck.pop(cardIndex)
+        #cardIndex +=1
+        activePlayer.CurrentCardTwo = ActiveDeck[cardIndex]
+        ActiveDeck.pop(cardIndex)
+        #cardIndex +=1
+    return ActiveDeck, thePlayers
+
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
     moveCount=0
     print(f"Welcome to round "+str(roundNumber))
@@ -47,11 +69,8 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
     else:
         startingIndex = currentDealerIndex
     #Loop logic to simulate 'turns' around a seated table
-    #Finds current dealer to shuffle deck
+    #Finds current dealer to shuffle deck and deal two cards face down to each player
     for playerIndex in range(0,len(seatedPlayers)):
-            #if playerIndex == 0:
-            #    currentDealer =seatedPlayers[playerIndex]
-            #    currentDealer.CurrentDealer = True
             currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
             if moveCount ==0:
                 currentDealer = seatedPlayers[currentIndex]
@@ -62,8 +81,27 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
             if activePlayer.CurrentDealer == True and moveCount ==0:
                 print(activePlayer.Name+" is the current rounds Dealer. Press any button to shuffle deck")
                 input()
-            moveCount+1
+                print(currentDealer.Name+" is shuffling cards.")
+                cards = shuffleDeck(cards)
+                print(currentDealer.Name+" is dealing cards.")
+                cardsPostDeal,seatedPlayers=dealCards(cards,seatedPlayers,currentIndex)
+                #test dealer's generated card one and two
+                print(currentDealer.Name+" face down card one is:"+str(currentDealer.CurrentCardOne))
+                printCard(currentDealer.CurrentCardOne)
+                print(currentDealer.Name+" face down card two is:"+str(currentDealer.CurrentCardTwo))
+                printCard(currentDealer.CurrentCardTwo)
+            else:
+                #test each player generated card one and two
+                print(activePlayer.Name+" face down card one is:"+str(activePlayer.CurrentCardOne))
+                printCard(activePlayer.CurrentCardOne)
+                print(activePlayer.Name+" face down card two is:"+str(activePlayer.CurrentCardTwo))
+                printCard(activePlayer.CurrentCardTwo)
+            moveCount =moveCount+1
+    print("Checking active deck post dealing of cards: total cards"+str(len(cardsPostDeal)))
+    printDeck(cardsPostDeal,len(cardsPostDeal))
+    #Conduct Blind Bet Phase
 
+    roundNumber+=1
 
 #create a function that resets all players currentDealer boolean after each round
 
@@ -97,6 +135,8 @@ class Game:
        self.dice = dice
        self.pot = 0
        self.ID = 0
+       self.currentDealer = None
+       self.currentStarter = None
     
     def ShuffleCards(cards):
         print(f"Dealer is shuffling cards")
@@ -117,6 +157,9 @@ class Player:
         self.CurrentFunds = 0
         self.IsEldest = False
         self.CurrentDealer = False
+        self.CurrentStarter = False
+        self.CurrentCardOne = -1
+        self.CurrentCardTwo = -1
     
     def RollPhase():
         pass
@@ -127,7 +170,7 @@ def printDeck(deckOfCards, numberOfCards):
      suites = ["clubs", "diamonds", "hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
      for cards in deckOfCards:
-        if cards < numberOfCards:
+        if cards < 52:
             value = values[cards %13]
             suit = suites[cards//13]
             if 0 <= len(suites):
