@@ -1,4 +1,6 @@
 import math
+import random
+import time
 #Number of players int NumPlayers
 #   ask player how many players to supply NumPlayers
 #   Based on num players generate the number of deck of cards
@@ -33,9 +35,72 @@ import math
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
-class Player:
-    def __init__(self,Name,DateOfBirth):
+def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
+    print(f"Welcome to round "+str(roundNumber))
+    if roundNumber == 1:
+        #startingIndex = len(seatedPlayers)-1
+        print(f"Number of players is "+str(len(seatedPlayers)))
+        print(f"Starting Index is "+str(currentDealerIndex))
+        for player in range(currentDealerIndex, -1, -1):
+            activePlayer = seatedPlayers[player]
+            print("Is player "+activePlayer.Name+" ready. Press any button to continue")
+            input()
+    else:
         pass
+
+def shuffleDeck(cards):
+    current_time = time.time()
+    random.seed(current_time)
+    random.shuffle(cards)
+    printDeck(cards, len(cards))
+    return cards
+#This does not take into account for ties
+def findEldest(players):
+    players.sort(key=lambda Player: Player.Age)
+    eldest_Player = players[-1]
+    eldest_Player.IsEldest = True
+    print("Eldest player is "+eldest_Player.Name)
+    return players
+
+def playGame(ListofCards,ListofPlayers,Dice):
+    roundNumber =1
+    ListofPlayers =findEldest(ListofPlayers)
+    ListofCards =shuffleDeck(ListofCards)
+    #rollDice(Dice)
+    #initGame = Game(ListofPlayers,ListofCards,Dice)
+    #ListofCards = initGame.ShuffleCards(ListofCards)
+    startRound(roundNumber,ListofPlayers,ListofCards,Dice,len(ListofPlayers)-1)
+
+class Game:
+    def __init__(self,players,cards,dice):
+       self.players = players
+       self.cards = cards
+       self.dice = dice
+    
+    def ShuffleCards(cards):
+        print(f"Dealer is shuffling cards")
+        cards = shuffleDeck(cards)
+        return cards
+    
+class Dice:
+    def __init__(self):
+        self.diceOne = [1,2,3,4,5,6]
+        self.diceTwo = [1,2,3,4,5,6]
+
+class Player:
+    def __init__(self,Name,Age):
+        self.Name = Name
+        self.Age = Age
+        self.CurrentTolerance = -1
+        self.CurrentPoints = 0
+        self.CurrentFunds = 0
+        self.IsEldest = False
+    
+    def RollPhase():
+        pass
+    def BettingPhase():
+        pass
+
 def printDeck(deckOfCards, numberOfCards):
      suites = ["clubs", "diamonds", "hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
@@ -48,10 +113,27 @@ def printDeck(deckOfCards, numberOfCards):
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
 
+def rollDice(dice):
+    current_time = time.time()
+    random.seed(current_time)
+    pickedSideOne = random.choice(dice.diceOne)
+    pickedSideTwo = random.choice(dice.diceTwo)
+    print(f"Rolled dice one: {pickedSideOne} dice two: {pickedSideTwo}")
+
+def initDice():
+    theDice = Dice()
+    return theDice
+
 def initPlayers(playerCount):
+    players = []
     for number in range(playerCount):
-        print("enter name")
-        print("Enter date of birth")
+        print("Enter name")
+        temp_name = input()
+        print("Enter age")
+        temp_age = input()
+        person= Player(temp_name, temp_age)
+        players.append(person)
+    return players
 
 def initdecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
@@ -75,8 +157,9 @@ def initdecks():
 
 def startGame():
     theCards, numberOfPlayers = initdecks()
-    initPlayers(numberOfPlayers)
-    #playrounds()
+    thePlayers = initPlayers(numberOfPlayers)
+    theDice = initDice()
+    playGame(theCards, thePlayers, theDice)
 
 def printRules():
     print("Welcome to the game of tolerance")
