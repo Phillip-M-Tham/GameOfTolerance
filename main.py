@@ -85,17 +85,19 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
                 cards = shuffleDeck(cards)
                 print(currentDealer.Name+" is dealing cards.")
                 cardsPostDeal,seatedPlayers=dealCards(cards,seatedPlayers,currentIndex)
+                
                 #test dealer's generated card one and two
-                print(currentDealer.Name+" face down card one is:"+str(currentDealer.CurrentCardOne))
-                printCard(currentDealer.CurrentCardOne)
-                print(currentDealer.Name+" face down card two is:"+str(currentDealer.CurrentCardTwo))
-                printCard(currentDealer.CurrentCardTwo)
+                #print(currentDealer.Name+" face down card one is:"+str(currentDealer.CurrentCardOne))
+                #printCard(currentDealer.CurrentCardOne)
+                #print(currentDealer.Name+" face down card two is:"+str(currentDealer.CurrentCardTwo))
+                #printCard(currentDealer.CurrentCardTwo)
             else:
+                pass
                 #test each player generated card one and two
-                print(activePlayer.Name+" face down card one is:"+str(activePlayer.CurrentCardOne))
-                printCard(activePlayer.CurrentCardOne)
-                print(activePlayer.Name+" face down card two is:"+str(activePlayer.CurrentCardTwo))
-                printCard(activePlayer.CurrentCardTwo)
+                #print(activePlayer.Name+" face down card one is:"+str(activePlayer.CurrentCardOne))
+                #printCard(activePlayer.CurrentCardOne)
+                #print(activePlayer.Name+" face down card two is:"+str(activePlayer.CurrentCardTwo))
+                #printCard(activePlayer.CurrentCardTwo)
             moveCount =moveCount+1
     print("Checking active deck post dealing of cards: total cards"+str(len(cardsPostDeal)))
     printDeck(cardsPostDeal,len(cardsPostDeal))
