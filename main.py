@@ -36,17 +36,36 @@ import time
 #       A list that is determined by number of players
 #  4. The Dice
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
+    moveCount=0
     print(f"Welcome to round "+str(roundNumber))
+    #set the currentDealerIndex, first round hard codes the startRound call length of player list -1 to pass last index of list
+    #We should check if seatedPlayers length is below 2 meaning all players left, should not be possible on first round but will be possible if turning this function recursive
     if roundNumber == 1:
-        #startingIndex = len(seatedPlayers)-1
+        startingIndex = len(seatedPlayers)-1
         print(f"Number of players is "+str(len(seatedPlayers)))
         print(f"Starting Index is "+str(currentDealerIndex))
-        for player in range(currentDealerIndex, -1, -1):
-            activePlayer = seatedPlayers[player]
-            print("Is player "+activePlayer.Name+" ready. Press any button to continue")
-            input()
     else:
-        pass
+        startingIndex = currentDealerIndex
+    #Loop logic to simulate 'turns' around a seated table
+    #Finds current dealer to shuffle deck
+    for playerIndex in range(0,len(seatedPlayers)):
+            #if playerIndex == 0:
+            #    currentDealer =seatedPlayers[playerIndex]
+            #    currentDealer.CurrentDealer = True
+            currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
+            if moveCount ==0:
+                currentDealer = seatedPlayers[currentIndex]
+                currentDealer.CurrentDealer = True 
+            activePlayer = seatedPlayers[currentIndex]
+            print("Is player "+activePlayer.Name+" ready? Press any button to continue")
+            input()
+            if activePlayer.CurrentDealer == True and moveCount ==0:
+                print(activePlayer.Name+" is the current rounds Dealer. Press any button to shuffle deck")
+                input()
+            moveCount+1
+
+
+#create a function that resets all players currentDealer boolean after each round
 
 def shuffleDeck(cards):
     current_time = time.time()
@@ -76,6 +95,8 @@ class Game:
        self.players = players
        self.cards = cards
        self.dice = dice
+       self.pot = 0
+       self.ID = 0
     
     def ShuffleCards(cards):
         print(f"Dealer is shuffling cards")
@@ -95,6 +116,7 @@ class Player:
         self.CurrentPoints = 0
         self.CurrentFunds = 0
         self.IsEldest = False
+        self.CurrentDealer = False
     
     def RollPhase():
         pass
@@ -135,17 +157,17 @@ def initPlayers(playerCount):
         players.append(person)
     return players
 
-def initdecks():
+def initDecks():
     print("please enter how many players, max players is 10") #cap 2 decks for meow
     userinput = input()
     try:#try catch to cast user input string to int
         numOfPlayers = int(userinput)
     except ValueError:
         print("Invalid input, please enter a number")
-        initdecks()
+        initDecks()
     if numOfPlayers > 10 or numOfPlayers <= 1: #check if user put in valid numbers if cast was successful
         print("Invalid input, please enter a valid number between 2 and 10")
-        initdecks()
+        initDecks()
     print("number of players is "+str(numOfPlayers))
     decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
     print("Number of decks is "+str(decksNeeded))
@@ -156,7 +178,7 @@ def initdecks():
     return totalCardsList, numOfPlayers
 
 def startGame():
-    theCards, numberOfPlayers = initdecks()
+    theCards, numberOfPlayers = initDecks()
     thePlayers = initPlayers(numberOfPlayers)
     theDice = initDice()
     playGame(theCards, thePlayers, theDice)
