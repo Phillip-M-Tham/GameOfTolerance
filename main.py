@@ -35,6 +35,47 @@ import time
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def updateThePlayers(listOfPlayers,dealer,starter):
+    for player in listOfPlayers:
+        if(player.Name == dealer.Name or player.Name == starter.Name):
+            print("check to see if its dealer or starter")
+            if(player.Name == dealer.Name):
+                player.CurrentDealer=True
+            else:
+                player.CurrentStarter=True
+        else:
+            pass
+    return listOfPlayers
+    
+
+def dealerShuffleDealCards(theCards,theDealer,thePlayers,startingIndex):
+    print(theDealer.Name+" is the current rounds Dealer. Press any button to shuffle deck")
+    input()
+    print(theDealer.Name+" is shuffling cards.")
+    theCards = shuffleDeck(theCards)
+    cardsPostDeal,thePlayers=dealCards(theCards,thePlayers,startingIndex)
+    return cardsPostDeal, thePlayers
+
+def findCurrentDealerStarter(currentRound,thePlayers,theDealerIndex):
+    if currentRound == 1:
+        theDealer = thePlayers[len(thePlayers)-1]
+        theStarter = thePlayers[0]
+        theDealerIndex = len(thePlayers)-1
+    else:
+        #update logic for updating dealer and starter might need additional parameter for recursive logic
+        theDealer = thePlayers[theDealerIndex]
+        if theDealerIndex +1 >= len(thePlayers):
+            theStarter = thePlayers[len(thePlayers)-1]
+        else:
+            theStarter = thePlayers[theDealerIndex +1]
+    theDealer.CurrentDealer=True
+    theStarter.CurrentStarter=True
+    thePlayers=updateThePlayers(thePlayers,theDealer,theStarter)
+    #test the updated player list
+    for player in thePlayers:
+        print(player.Name+" current status: "+"Dealer: "+str(player.CurrentDealer)+"Starter: "+str(player.CurrentStarter))
+    return theDealer,theStarter,theDealerIndex,thePlayers
+
 def printCard(theCard):
     suites = ["clubs", "diamonds", "hearts", "Spades"]
     values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
@@ -51,10 +92,8 @@ def dealCards(theCards, thePlayers, CurrentIndex):
         activePlayer = thePlayers[currentIndex]
         activePlayer.CurrentCardOne = ActiveDeck[cardIndex]
         ActiveDeck.pop(cardIndex)
-        #cardIndex +=1
         activePlayer.CurrentCardTwo = ActiveDeck[cardIndex]
         ActiveDeck.pop(cardIndex)
-        #cardIndex +=1
     return ActiveDeck, thePlayers
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
@@ -62,51 +101,60 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex):
     print(f"Welcome to round "+str(roundNumber))
     #set the currentDealerIndex, first round hard codes the startRound call length of player list -1 to pass last index of list
     #We should check if seatedPlayers length is below 2 meaning all players left, should not be possible on first round but will be possible if turning this function recursive
-    if roundNumber == 1:
-        startingIndex = len(seatedPlayers)-1
-        print(f"Number of players is "+str(len(seatedPlayers)))
-        print(f"Starting Index is "+str(currentDealerIndex))
+    if(roundNumber != 1):
+        currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,currentDealerIndex)
     else:
-        startingIndex = currentDealerIndex
-    #Loop logic to simulate 'turns' around a seated table
-    #Finds current dealer to shuffle deck and deal two cards face down to each player
+        currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
+    dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
+    
+    print("Current Starter is "+currentStarter.Name)
+            #Finds current dealer to shuffle deck and deal two cards face down to each player
     for playerIndex in range(0,len(seatedPlayers)):
-            currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
-            if moveCount ==0:
-                currentDealer = seatedPlayers[currentIndex]
-                currentDealer.CurrentDealer = True 
-            activePlayer = seatedPlayers[currentIndex]
-            print("Is player "+activePlayer.Name+" ready? Press any button to continue")
-            input()
-            if activePlayer.CurrentDealer == True and moveCount ==0:
-                print(activePlayer.Name+" is the current rounds Dealer. Press any button to shuffle deck")
-                input()
-                print(currentDealer.Name+" is shuffling cards.")
-                cards = shuffleDeck(cards)
-                print(currentDealer.Name+" is dealing cards.")
-                cardsPostDeal,seatedPlayers=dealCards(cards,seatedPlayers,currentIndex)
+        currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
+            #if moveCount ==0:
+                #currentDealer = seatedPlayers[currentIndex]
+                #currentDealer.CurrentDealer = True 
+        activePlayer = seatedPlayers[currentIndex]
+        print("Is player "+activePlayer.Name+" ready? Press any button to continue")
+        input()
+            #if activePlayer.CurrentDealer == True and moveCount ==0:
+            #    print(activePlayer.Name+" is the current rounds Dealer. Press any button to shuffle deck")
+            #    input()
+            #    print(currentDealer.Name+" is shuffling cards.")
+            #    cards = shuffleDeck(cards)
+            #    print(currentDealer.Name+" is dealing cards.")
+            #    cardsPostDeal,seatedPlayers=dealCards(cards,seatedPlayers,currentIndex)
                 
-                #test dealer's generated card one and two
-                #print(currentDealer.Name+" face down card one is:"+str(currentDealer.CurrentCardOne))
-                #printCard(currentDealer.CurrentCardOne)
-                #print(currentDealer.Name+" face down card two is:"+str(currentDealer.CurrentCardTwo))
-                #printCard(currentDealer.CurrentCardTwo)
-            else:
-                pass
-                #test each player generated card one and two
-                #print(activePlayer.Name+" face down card one is:"+str(activePlayer.CurrentCardOne))
-                #printCard(activePlayer.CurrentCardOne)
-                #print(activePlayer.Name+" face down card two is:"+str(activePlayer.CurrentCardTwo))
-                #printCard(activePlayer.CurrentCardTwo)
-            moveCount =moveCount+1
-    print("Checking active deck post dealing of cards: total cards"+str(len(cardsPostDeal)))
-    printDeck(cardsPostDeal,len(cardsPostDeal))
+            #test dealer's generated card one and two
+            #    print(currentDealer.Name+" face down card one is:"+str(currentDealer.CurrentCardOne))
+            #    printCard(currentDealer.CurrentCardOne)
+            #    print(currentDealer.Name+" face down card two is:"+str(currentDealer.CurrentCardTwo))
+            #    printCard(currentDealer.CurrentCardTwo)
+            #else:
+            #    pass
+            #test each player generated card one and two
+            #    print(activePlayer.Name+" face down card one is:"+str(activePlayer.CurrentCardOne))
+            #    printCard(activePlayer.CurrentCardOne)
+            #    print(activePlayer.Name+" face down card two is:"+str(activePlayer.CurrentCardTwo))
+            #    printCard(activePlayer.CurrentCardTwo)
+        moveCount =moveCount+1
+    #print("Checking active deck post dealing of cards: total cards"+str(len(cardsPostDeal)))
+    #printDeck(cardsPostDeal,len(cardsPostDeal))
     #Conduct Blind Bet Phase
+    
+    #if roundNumber == 1:
+    #    startingIndex = len(seatedPlayers)-1
+    #    print(f"Number of players is "+str(len(seatedPlayers)))
+    #    print(f"Starting Index is "+str(currentDealerIndex))
+    #else:
+    #    startingIndex = currentDealerIndex
+    #Loop logic to simulate 'turns' around a seated table
+
 
     roundNumber+=1
 
 #create a function that resets all players currentDealer boolean after each round
-
+#create a function that updates the currentDealerIndex
 def shuffleDeck(cards):
     current_time = time.time()
     random.seed(current_time)
@@ -151,12 +199,12 @@ class Dice:
         self.diceTwo = [1,2,3,4,5,6]
 
 class Player:
-    def __init__(self,Name,Age):
+    def __init__(self,Name,Age,Funds):
         self.Name = Name
         self.Age = Age
         self.CurrentTolerance = -1
         self.CurrentPoints = 0
-        self.CurrentFunds = 0
+        self.CurrentFunds = Funds
         self.IsEldest = False
         self.CurrentDealer = False
         self.CurrentStarter = False
@@ -198,7 +246,9 @@ def initPlayers(playerCount):
         temp_name = input()
         print("Enter age")
         temp_age = input()
-        person= Player(temp_name, temp_age)
+        print("Enter funds")
+        temp_funds = input()
+        person= Player(temp_name, temp_age,temp_funds)
         players.append(person)
     return players
 
