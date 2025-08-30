@@ -1,6 +1,7 @@
 import math
 import random
 import time
+import os
 #Number of players int NumPlayers
 #   ask player how many players to supply NumPlayers
 #   Based on num players generate the number of deck of cards
@@ -35,10 +36,56 @@ import time
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
-def initBlindBet(listOfPlayers, theStarter):
+#Might have to create a updateBlindBet function when players decrease down to two and increase back up past two players
+def setBlindBets(listOfPlayers):
+    bigBlind =-1
+    smallBlind =-1
+    if(len(listOfPlayers) ==2):
+        print("Only 2 players found, setting only one blind. Press Enter to continue")
+        input()
+        print("Enter a value to set blind")
+        userInput = input()
+        try:
+            smallBlind = float(userInput)
+        except ValueError:
+            print("Invalid input, please enter a number")
+            setBlindBets(listOfPlayers)
+        for player in listOfPlayers:
+            if(float(player.CurrentFunds) - smallBlind <= 0):
+                print("Not all players can afford blindbet, please pick a smaller blind")
+                setBlindBets(listOfPlayers)
+    else:
+        print("More than 2 players found. Setting up big and small blinds. Press Enter to continue")
+        input()
+        print("Enter a vlue to set small blind")
+        userInput = input()
+        try:
+            smallBlind = float(userInput)
+        except ValueError:
+            print("Invalid input, please enter a number")
+            setBlindBets(listOfPlayers)
+        for player in listOfPlayers:
+            if(float(player.CurrentFunds) - smallBlind <=0):
+                print("Not all players can afford the small blind, please pick a smaller blind")
+                setBlindBets(listOfPlayers)
+        print("Enter a value to set big blind")
+        userInput= input()
+        try:
+            bigBlind = float(userInput)
+        except ValueError:
+            print("Invalid input, please enter a number")
+            setBlindBets(listOfPlayers)
+        for player in listOfPlayers:
+            if(float(player.CurrentFunds) - bigBlind <=0):
+                print("Not all players can afford the big blind, please pick a smaller blind")
+                setBlindBets(listOfPlayers)
+    return smallBlind, bigBlind
+
+def initBettingPhase(listOfPlayers, theStarter,smallBlind,bigBlind):
     #find the starters index in the list of players
     starterIndex = -1
     currIndex = 0
+    currentPot= 0.0
     #This does not account for list of players with the same name
     for player in listOfPlayers:
         if(player.Name == theStarter.Name):
@@ -47,26 +94,48 @@ def initBlindBet(listOfPlayers, theStarter):
         else:
             currIndex +=1
     if starterIndex != -1:
-        for playerIndex in range(0,len(listOfPlayers)):
-            currentIndex = (starterIndex + playerIndex) % len(listOfPlayers)
-            activePlayer = listOfPlayers[currentIndex]
-            if(activePlayer.CurrentStarter == True):
-                print("Player "+activePlayer.Name+" is the current Starter")
-            #else:
-            print("Player "+activePlayer.Name+" press enter to start blind bet phase")
-            input()
+        if len(listOfPlayers) == 2:
+            for playerIndex in range(0,len(listOfPlayers)):
+                currentIndex = (starterIndex + playerIndex) % len(listOfPlayers)
+                activePlayer = listOfPlayers[currentIndex]
+                if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmallBlind == True):
+                    print("Player "+activePlayer.Name+" is the current Starter")
+                    print("player "+activePlayer.Name+" press any key to initialize blind bet")
+                    input()
+                    print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
+                    activePlayer.CurrentFunds -= smallBlind
+                    currentPot += smallBlind
+                    print("Current Pot is "+str(currentPot))
+                else:
+                    print("Player "+activePlayer.Name+" press enter to start betting phase")
+                    input()
+        else:
+           #more than 2 players puts both blinds in play
+            for playerIndex in range(0, len(listOfPlayers)): 
+                currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
+                activePlayer = listOfPlayers[currentIndex]
+                if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmallBlind ==True):
+                    print("Player "+activePlayer.Name+" is the current Starter")
+                    print("player "+activePlayer.Name+" press any key to initialize blind bet")
+                    input()
+                    print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
+                    activePlayer.CurrentFunds -= smallBlind
+                    currentPot += smallBlind
+                    print("Current Pot is "+str(currentPot))
+                elif activePlayer.CurrentBigBlind == True:
+                    print("DO WE GET HERE????")
+                 
     else:
-        print("Error, unable to find matching name between list of players and set Starter Player name")
-    
-    
+        print("Error, unable to find matching name between list of players and set Starter Player name")  
 
 def updateThePlayers(listOfPlayers,dealer,starter):
     for player in listOfPlayers:
         if(player.Name == dealer.Name or player.Name == starter.Name):
-            if(player.Name == dealer.Name):
+            if player.Name == dealer.Name:
                 player.CurrentDealer=True
             else:
                 player.CurrentStarter=True
+                player.CurrentSmallBlind=True
         else:
             pass
     return listOfPlayers
@@ -78,21 +147,29 @@ def dealerShuffleDealCards(theCards,theDealer,thePlayers,startingIndex):
     theCards = shuffleDeck(theCards)
     cardsPostDeal,thePlayers=dealCards(theCards,thePlayers,startingIndex)
     return cardsPostDeal, thePlayers
+def findCurrentBigBind(currentDealerIndex, listOfPlayers):
+    pass
 
 def findCurrentDealerStarter(currentRound,thePlayers,theDealerIndex):
     if currentRound == 1:
         theDealer = thePlayers[len(thePlayers)-1]
         theStarter = thePlayers[0]
         theDealerIndex = len(thePlayers)-1
+        if(len(thePlayers) >2):
+            findCurrentBigBind(theDealerIndex, thePlayers)
     else:
         #update logic for updating dealer and starter might need additional parameter for recursive logic
         theDealer = thePlayers[theDealerIndex]
+        #setting starter tracker for round
         if theDealerIndex +1 >= len(thePlayers):
             theStarter = thePlayers[0]
         else:
             theStarter = thePlayers[theDealerIndex +1]
+        if theDealerIndex +2 >= len(thePlayers) and len(thePlayers) > 2:
+            pass
     theDealer.CurrentDealer=True
     theStarter.CurrentStarter=True
+    theStarter.CurrentSmall=True
     #function to actually update the list of players being passed around each round's phase functions
     thePlayers=updateThePlayers(thePlayers,theDealer,theStarter)
     #test the updated player list
@@ -120,8 +197,9 @@ def dealCards(theCards, thePlayers, CurrentIndex):
         ActiveDeck.pop(cardIndex)
     return ActiveDeck, thePlayers
 
-def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, currentPot):
+def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
+    currentPot=0
     #set the currentDealerIndex, first round hard codes the startRound call length of player list -1 to pass last index of list
     #Finds current dealer to shuffle deck and deal two cards face down to each player, finds current starter
     #We should check if seatedPlayers length is below 2 meaning all players left, should not be possible on first round but will be possible if turning this function recursive
@@ -131,7 +209,7 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, currentP
         currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
     cardsPostDeal,seatedPlayers=dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
     #Start Betting Phase
-    initBlindBet(seatedPlayers,currentStarter)
+    CurrentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind)
     #print("Current Starter is "+currentStarter.Name)
     #for playerIndex in range(0,len(seatedPlayers)):
     #    currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
@@ -142,8 +220,9 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, currentP
     #Increment Round after the end of all phases in a round
     roundNumber+=1
 
-#create a function that resets all players currentDealer boolean after each round
-#create a function that updates the currentDealerIndex
+#TODOS:
+#***create a function that resets all players currentDealer boolean after each round
+#***create a function that updates the currentDealerIndex
 def shuffleDeck(cards):
     current_time = time.time()
     random.seed(current_time)
@@ -162,11 +241,11 @@ def playGame(ListofCards,ListofPlayers,Dice):
     roundNumber =1
     ListofPlayers =findEldest(ListofPlayers)
     ListofCards =shuffleDeck(ListofCards)
-    currentPot = 0
     #rollDice(Dice)
     #initGame = Game(ListofPlayers,ListofCards,Dice)
     #ListofCards = initGame.ShuffleCards(ListofCards)
-    startRound(roundNumber,ListofPlayers,ListofCards,Dice,len(ListofPlayers)-1,currentPot)
+    bigBlind, smallBlind =setBlindBets(ListofPlayers)
+    startRound(roundNumber,ListofPlayers,ListofCards,Dice,len(ListofPlayers)-1,bigBlind,smallBlind)
 
 #class Game:
 #    def __init__(self,players,cards,dice):
@@ -185,8 +264,7 @@ def playGame(ListofCards,ListofPlayers,Dice):
     
 class Dice:
     def __init__(self):
-        self.diceOne = [1,2,3,4,5,6]
-        self.diceTwo = [1,2,3,4,5,6]
+        self.diceOne = [1,2,3,4,5,6,7,8,9,10]
 
 class Player:
     def __init__(self,Name,Age,Funds):
@@ -194,12 +272,14 @@ class Player:
         self.Age = Age
         self.CurrentTolerance = -1
         self.CurrentPoints = 0
-        self.CurrentFunds = Funds
+        self.CurrentFunds = float(Funds)
         self.IsEldest = False
         self.CurrentDealer = False
         self.CurrentStarter = False
         self.CurrentCardOne = -1
         self.CurrentCardTwo = -1
+        self.CurrentSmall = False
+        self.CurrentBig = False
     
     def RollPhase():
         pass
@@ -207,7 +287,7 @@ class Player:
         pass
 
 def printDeck(deckOfCards, numberOfCards):
-     suites = ["clubs", "diamonds", "hearts", "Spades"]
+     suites = ["Clubs", "Diamonds", "Hearts", "Spades"]
      values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
      for cards in deckOfCards:
         if cards < 52:
@@ -222,14 +302,14 @@ def rollDice(dice):
     current_time = time.time()
     random.seed(current_time)
     pickedSideOne = random.choice(dice.diceOne)
-    pickedSideTwo = random.choice(dice.diceTwo)
-    print(f"Rolled dice one: {pickedSideOne} dice two: {pickedSideTwo}")
+    print(f"Rolled dice one:{pickedSideOne}")
 
 def initDice():
     theDice = Dice()
     return theDice
 
 def initPlayers(playerCount):
+    #We might need to add a check here for duplicate names and force different names ie: Dre1 and Dre2
     players = []
     for number in range(playerCount):
         print("Enter name")
