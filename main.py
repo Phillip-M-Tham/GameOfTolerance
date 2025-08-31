@@ -36,12 +36,25 @@ import os
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def clearTerminal():
+    if os.name == 'nt':#windows
+        os.system('cls')
+    else:
+        os.system('clear')
+
 def peakCards(listOfPlayers):
-    #clearTerminal()#clear the screen
     print("Each player is now allowed to look at thier own cards")
-    #clearTerminal()
     for player in listOfPlayers: #iterate through the list of players
         print("Player "+player.Name+" press Enter when ready to look at your cards")
+        input()
+        clearTerminal()
+        cardOne= player.CurrentCardOne
+        cardTwo= player.CurrentCardTwo
+        printCard(cardOne)
+        printCard(cardTwo)
+        print("Press Enter when ready to move on")
+        input()
+        clearTerminal()
 
 def initPot(listOfPlayers,smallBlind,bigBlind):
     thePot=0
@@ -83,7 +96,7 @@ def setBlindBets(listOfPlayers):
     else:
         print("More than 2 players found. Setting up big and small blinds. Press Enter to continue")
         input()
-        print("Enter a vlue to set small blind")
+        print("Enter a value to set small blind")
         userInput = input()
         try:
             smallBlind = float(userInput)
@@ -156,8 +169,6 @@ def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
                     print("Current Pot is $"+str(currentPot))
                 else:
                     pass
-                    #print("Player "+activePlayer.Name+" press enter to start betting phase")
-                    #input()
     else:
         print("Error, unable to find matching name between list of players and set Starter Player name")  
 
@@ -228,9 +239,6 @@ def findCurrentDealerStarter(currentRound,thePlayers,theDealerIndex):
     theStarter.CurrentSmall=True
     #function to actually update the list of players being passed around each round's phase functions
     thePlayers=updateThePlayers(thePlayers,theDealer,theStarter,theBigBlind)
-    #test the updated player list
-    #for player in thePlayers:
-    #    print(player.Name+" current status: "+"Dealer: "+str(player.CurrentDealer)+"Starter: "+str(player.CurrentStarter))
     return theDealer,theStarter,theDealerIndex,thePlayers
 
 def printCard(theCard):
@@ -270,13 +278,6 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     peakCards(seatedPlayers)
     #Start Betting Phase
     currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
-    #print("Current Starter is "+currentStarter.Name)
-    #for playerIndex in range(0,len(seatedPlayers)):
-    #    currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
-    #    activePlayer = seatedPlayers[currentIndex]
-    #    print("Is player "+activePlayer.Name+" ready? Press any button to continue")
-    #    input()
-
     #Increment Round after the end of all phases in a round
     roundNumber+=1
 
