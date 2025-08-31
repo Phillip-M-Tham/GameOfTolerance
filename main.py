@@ -36,6 +36,69 @@ import os
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def calcCurrentPoints(cardOne,cardTwo,thePlayer):
+    curPoints=0
+    values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
+    valueCardOne = values[cardOne%13]
+    valueCardTwo = values[cardTwo%13]
+    if(valueCardOne == "two"):
+        curPoints += 2
+    elif(valueCardOne == "three"):
+        curPoints += 3
+    elif(valueCardOne == "four"):
+        curPoints += 4
+    elif(valueCardOne == "five"):
+        curPoints += 5
+    elif(valueCardOne == "six"):
+        curPoints +=6
+    elif(valueCardOne == "seven"):
+        curPoints +=7
+    elif(valueCardOne == "eight"):
+        curPoints +=8
+    elif(valueCardOne == "nine"):
+        curPoints +=9
+    elif(valueCardOne == "ten"):
+        curPoints +=10
+    elif(valueCardOne == "Jack"):
+        curPoints += 11
+    elif(valueCardOne == "Queen"):
+        curPoints += 12
+    elif(valueCardOne == "King"):
+        curPoints += 13
+    else:#everything but Aces are checked to find current points based on card one
+        curPoints +=1
+    if(valueCardTwo == "two"):
+        curPoints += 2
+    elif(valueCardTwo == "three"):
+        curPoints += 3
+    elif(valueCardTwo == "four"):
+        curPoints += 4
+    elif(valueCardTwo == "five"):
+        curPoints += 5
+    elif(valueCardTwo == "six"):
+        curPoints +=6
+    elif(valueCardTwo == "seven"):
+        curPoints +=7
+    elif(valueCardTwo == "eight"):
+        curPoints +=8
+    elif(valueCardTwo == "nine"):
+        curPoints +=9
+    elif(valueCardTwo == "ten"):
+        curPoints +=10
+    elif(valueCardTwo == "Jack"):
+        curPoints += 11
+    elif(valueCardTwo == "Queen"):
+        curPoints += 12
+    elif(valueCardTwo == "King"):
+        curPoints += 13
+    else:#everything but Aces are checked to find current points based on card one
+        curPoints +=1
+    return curPoints
+    
+def bettingPhasePreFlop(listOfPlayers):
+    for player in listOfPlayers:
+        print(player.Name)
+
 def clearTerminal():
     if os.name == 'nt':#windows
         os.system('cls')
@@ -52,6 +115,8 @@ def peakCards(listOfPlayers):
         cardTwo= player.CurrentCardTwo
         printCard(cardOne)
         printCard(cardTwo)
+        player.CurrentPoints=calcCurrentPoints(cardOne,cardTwo,player)
+        print("Total Current Points: "+str(player.CurrentPoints))
         print("Press Enter when ready to move on")
         input()
         clearTerminal()
@@ -272,12 +337,21 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     else:
         currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
     cardsPostDeal,seatedPlayers=dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
-    #Init the pot with blind bets
+    #Init the pot with blind bets "posting blinds"
     currentPot=initPot(seatedPlayers,bigBlind,smallBlind)
     #Let Players look at thier cards
     peakCards(seatedPlayers)
-    #Start Betting Phase
-    currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
+    #Start Betting Phase Preflop
+    bettingPhasePreFlop(seatedPlayers)
+    #Start Rolling Phase Preflop
+
+    #continue with betting phase flop
+    #Start Rolling Phase flop
+
+    #end with betting phase turn(Tolerance only has 3 rounds of betting)
+    
+
+    #currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
     #Increment Round after the end of all phases in a round
     roundNumber+=1
 
