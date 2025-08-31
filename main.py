@@ -36,7 +36,31 @@ import os
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
+def peakCards(listOfPlayers):
+    #clearTerminal()#clear the screen
+    print("Each player is now allowed to look at thier own cards")
+    #clearTerminal()
+    for player in listOfPlayers: #iterate through the list of players
+        print("Player "+player.Name+" press Enter when ready to look at your cards")
 
+def initPot(listOfPlayers,smallBlind,bigBlind):
+    thePot=0
+    for player in listOfPlayers:
+        #print("Player "+player.Name+" status: CurrentSmall: "+str(player.CurrentSmall)+" CurrentBig: "+str(player.CurrentBig))
+        if(player.CurrentSmall == True):
+            print("Player "+player.Name+" is the small blind")
+            player.CurrentFunds -= smallBlind
+            print("Player "+player.Name+" deducted $"+str(smallBlind)+" from their current funds")
+            thePot += smallBlind
+        elif(player.CurrentBig == True):
+            print("Player "+player.Name+" is the big blind")
+            player.CurrentFunds -= bigBlind
+            print("Player "+player.Name+" deducted $"+str(bigBlind)+" from their current funds")
+            thePot += bigBlind
+        else:
+            pass
+    print("Initialized pot is $"+str(thePot))
+    return thePot
 
 #Might have to create a updateBlindBet function when players decrease down to two and increase back up past two players
 def setBlindBets(listOfPlayers):
@@ -83,11 +107,11 @@ def setBlindBets(listOfPlayers):
                 setBlindBets(listOfPlayers)
     return smallBlind, bigBlind
 
-def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind):
+def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
     starterIndex = -1
     currIndex = 0
-    currentPot= 0.0
+    #currentPot= 0.0
     #This does not account for list of players with the same name
     for player in listOfPlayers:
         if(player.Name == theStarter.Name):
@@ -109,8 +133,7 @@ def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind):
                     currentPot += smallBlind
                     print("Current Pot is "+str(currentPot))
                 else:
-                    print("Player "+activePlayer.Name+" press enter to start betting phase")
-                    input()
+                    pass
         else:
            #more than 2 players puts both blinds in play
             for playerIndex in range(0, len(listOfPlayers)): 
@@ -118,8 +141,9 @@ def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind):
                 activePlayer = listOfPlayers[currentIndex]
                 if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmall ==True):
                     print("Player "+activePlayer.Name+" is the current Starter")
-                    print("player "+activePlayer.Name+" press any key to initialize blind bet")
+                    print("Player "+activePlayer.Name+" press any key to initialize blind bet")
                     input()
+                    print("Player"+activePlayer.Name+" is the current Small Blind")
                     print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
                     activePlayer.CurrentFunds -= smallBlind
                     currentPot += smallBlind
@@ -131,8 +155,9 @@ def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind):
                     currentPot += bigBlind
                     print("Current Pot is $"+str(currentPot))
                 else:
-                    print("Player "+activePlayer.Name+" press enter to start betting phase")
-                    input()
+                    pass
+                    #print("Player "+activePlayer.Name+" press enter to start betting phase")
+                    #input()
     else:
         print("Error, unable to find matching name between list of players and set Starter Player name")  
 
@@ -239,8 +264,12 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     else:
         currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
     cardsPostDeal,seatedPlayers=dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
+    #Init the pot with blind bets
+    currentPot=initPot(seatedPlayers,bigBlind,smallBlind)
+    #Let Players look at thier cards
+    peakCards(seatedPlayers)
     #Start Betting Phase
-    CurrentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind)
+    currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
     #print("Current Starter is "+currentStarter.Name)
     #for playerIndex in range(0,len(seatedPlayers)):
     #    currentIndex = (startingIndex + playerIndex) % len(seatedPlayers) 
@@ -258,7 +287,7 @@ def shuffleDeck(cards):
     current_time = time.time()
     random.seed(current_time)
     random.shuffle(cards)
-    printDeck(cards, len(cards))
+    #printDeck(cards, len(cards))
     return cards
 #This does not take into account for ties
 def findEldest(players):
