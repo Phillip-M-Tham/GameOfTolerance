@@ -186,7 +186,32 @@ def setBlindBets(listOfPlayers):
                 setBlindBets(listOfPlayers)
     return smallBlind, bigBlind
 
-def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,CurrentPot):
+def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
+    validRaise=0.0
+    print("Player "+currentPlayer.Name+" please enter raise larger than $"+str(currentBet))
+    tempRaise = input()
+    try:
+        validRaise= float(tempRaise)
+    except ValueError:
+        print("Invalid input, please enter a float")
+        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+    if validRaise <= currentBet:
+        print("Raise is less than or equal to current max bet, please try again")
+        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+    if currentPlayer.CurrentFunds - validRaise <= 0.0:
+        #this only checks against current player, might want to check against all players funds
+        print("Raise is bigger than player's current funds, please try again")
+        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+    for player in listOfPlayers:
+        if player.Name == currentPlayer.Name:
+            player.CurrentFunds -= validRaise
+            break
+        else:
+            pass
+    currentPot += validRaise
+    return listOfPlayers, validRaise, currentPot
+
+def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     starterIndex = -1
     currIndex = 0
     validMove=-1
@@ -214,16 +239,18 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,CurrentPot):
             break
         if(validMove == 1):
             print("Player "+activePlayer.Name+" chose to call!")
-            CurrentPot=activePlayer.call(bigBlind,CurrentPot)
-            print("Current pot is $"+str(CurrentPot))
+            currentPot=activePlayer.callBet(bigBlind,currentPot)
+            print("Current pot is $"+str(currentPot))
         elif(validMove==2):
             print("Player "+activePlayer.Name+" chose to Raise!")
+            listOfPlayers, bigBlind, currentPot= playerRaise(listOfPlayers,activePlayer,bigBlind,currentPot)
+            print("Current pot is $"+str(currentPot))
         else:
             print("Player "+activePlayer.Name+" chose to Fold!")
     if isMoveValid == True:
         print("We get to do something")
     else:
-        bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,CurrentPot)
+        bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot)
 
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
@@ -442,7 +469,7 @@ class Player:
     def checkStat(self):
         print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
 
-    def call(self,currentBet, currentPot):
+    def callBet(self,currentBet, currentPot):
         self.CurrentFunds -= currentBet
         currentPot += currentBet
         return currentPot
