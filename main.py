@@ -36,7 +36,11 @@ import os
 #  3. Deck of Cards
 #       A list that is determined by number of players
 #  4. The Dice
-def calcCurrentPoints(cardOne,cardTwo,thePlayer):
+def checkPlayerStat(listOfPlayers):
+    for player in listOfPlayers:
+        player.checkStat()
+
+def calcCurrentPoints(cardOne,cardTwo):
     curPoints=0
     values = [ "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "Jack", "Queen", "King", "Ace" ]
     valueCardOne = values[cardOne%13]
@@ -91,13 +95,9 @@ def calcCurrentPoints(cardOne,cardTwo,thePlayer):
         curPoints += 12
     elif(valueCardTwo == "King"):
         curPoints += 13
-    else:#everything but Aces are checked to find current points based on card one
+    else:#everything but Aces are checked to find current points based on card two
         curPoints +=1
     return curPoints
-    
-def bettingPhasePreFlop(listOfPlayers):
-    for player in listOfPlayers:
-        print(player.Name)
 
 def clearTerminal():
     if os.name == 'nt':#windows
@@ -115,11 +115,12 @@ def peakCards(listOfPlayers):
         cardTwo= player.CurrentCardTwo
         printCard(cardOne)
         printCard(cardTwo)
-        player.CurrentPoints=calcCurrentPoints(cardOne,cardTwo,player)
+        player.CurrentPoints=calcCurrentPoints(cardOne,cardTwo)
         print("Total Current Points: "+str(player.CurrentPoints))
         print("Press Enter when ready to move on")
         input()
         clearTerminal()
+    return listOfPlayers
 
 def initPot(listOfPlayers,smallBlind,bigBlind):
     thePot=0
@@ -185,6 +186,45 @@ def setBlindBets(listOfPlayers):
                 setBlindBets(listOfPlayers)
     return smallBlind, bigBlind
 
+def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,CurrentPot):
+    starterIndex = -1
+    currIndex = 0
+    validMove=-1
+    isMoveValid = True
+    for player in listOfPlayers:
+        if(player.Name == theStarter.Name):
+            starterIndex = currIndex
+            break
+        else:
+            currIndex +=1
+    for playerIndex in range(0, len(listOfPlayers)): 
+        currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
+        activePlayer = listOfPlayers[currentIndex]
+        print("Player "+activePlayer.Name+" Enter 1(Call) 2(Raise) or 3(Fold)")
+        playerMove= input()
+        try:
+            validMove= int(playerMove)
+        except ValueError:
+            print("Invalid input, please enter a number 1-3")
+            isMoveValid = False
+            break
+        if(validMove < 0 or validMove > 3):
+            print("Invalid input, please enter a number 1-3")
+            isMoveValid = False
+            break
+        if(validMove == 1):
+            print("Player "+activePlayer.Name+" chose to call!")
+            CurrentPot=activePlayer.call(bigBlind,CurrentPot)
+            print("Current pot is $"+str(CurrentPot))
+        elif(validMove==2):
+            print("Player "+activePlayer.Name+" chose to Raise!")
+        else:
+            print("Player "+activePlayer.Name+" chose to Fold!")
+    if isMoveValid == True:
+        print("We get to do something")
+    else:
+        bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,CurrentPot)
+
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
     starterIndex = -1
@@ -204,7 +244,7 @@ def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
                 activePlayer = listOfPlayers[currentIndex]
                 if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmall == True):
                     print("Player "+activePlayer.Name+" is the current Starter")
-                    print("player "+activePlayer.Name+" press any key to initialize blind bet")
+                    print("player "+activePlayer.Name+" press Enter to initialize blind bet")
                     input()
                     print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
                     activePlayer.CurrentFunds -= smallBlind
@@ -340,9 +380,10 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #Init the pot with blind bets "posting blinds"
     currentPot=initPot(seatedPlayers,bigBlind,smallBlind)
     #Let Players look at thier cards
-    peakCards(seatedPlayers)
+    seatedPlayers=peakCards(seatedPlayers)
+    #checkPlayerStat(seatedPlayers)
     #Start Betting Phase Preflop
-    bettingPhasePreFlop(seatedPlayers)
+    bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
 
     #continue with betting phase flop
@@ -376,7 +417,7 @@ def playGame(ListofCards,ListofPlayers,Dice):
     roundNumber =1
     ListofPlayers =findEldest(ListofPlayers)
     ListofCards =shuffleDeck(ListofCards)
-    bigBlind, smallBlind =setBlindBets(ListofPlayers)
+    smallBlind,bigBlind =setBlindBets(ListofPlayers)
     startRound(roundNumber,ListofPlayers,ListofCards,Dice,len(ListofPlayers)-1,bigBlind,smallBlind)
     
 class Dice:
@@ -397,7 +438,15 @@ class Player:
         self.CurrentCardTwo = -1
         self.CurrentSmall = False
         self.CurrentBig = False
-    
+
+    def checkStat(self):
+        print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
+
+    def call(self,currentBet, currentPot):
+        self.CurrentFunds -= currentBet
+        currentPot += currentBet
+        return currentPot
+
     def RollPhase():
         pass
     def BettingPhase():
@@ -427,6 +476,7 @@ def initDice():
 
 def initPlayers(playerCount):
     #We might need to add a check here for duplicate names and force different names ie: Dre1 and Dre2
+    #TO DO ***add checks against bad user input***
     players = []
     for number in range(playerCount):
         print("Enter name")
