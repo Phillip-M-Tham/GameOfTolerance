@@ -219,12 +219,13 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     validMove=-1
     isMoveValid = True
     bettingOngoing = True
-    for player in listOfPlayers:
-        if(player.Name == theStarter.Name):
-            starterIndex = currIndex
-            break
-        else:
-            currIndex +=1
+    while bettingOngoing:
+        for player in listOfPlayers:
+            if(player.Name == theStarter.Name):
+                starterIndex = currIndex
+                break
+            else:
+                currIndex +=1
         for playerIndex in range(0, len(listOfPlayers)): 
             currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
             activePlayer = listOfPlayers[currentIndex]
@@ -254,7 +255,6 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
                     activePlayer.foldBet()
             else:
                 pass
-        while bettingOngoing:
             whileLoopChecker=checkPlayersCanRespond(listOfPlayers)
             if(whileLoopChecker == True):
                 bettingOngoing = False
