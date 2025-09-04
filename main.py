@@ -219,13 +219,13 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     validMove=-1
     isMoveValid = True
     bettingOngoing = True
-    while bettingOngoing:
-        for player in listOfPlayers:
+    for player in listOfPlayers:
             if(player.Name == theStarter.Name):
                 starterIndex = currIndex
                 break
             else:
                 currIndex +=1
+    while bettingOngoing:
         for playerIndex in range(0, len(listOfPlayers)): 
             currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
             activePlayer = listOfPlayers[currentIndex]
@@ -425,7 +425,7 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
         currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
     cardsPostDeal,seatedPlayers=dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
     #Init the pot with blind bets "posting blinds"
-    currentPot=initPot(seatedPlayers,bigBlind,smallBlind)
+    currentPot=initPot(seatedPlayers,smallBlind,bigBlind)
     #Let Players look at thier cards
     seatedPlayers=peakCards(seatedPlayers)
     checkPlayerStat(seatedPlayers)
