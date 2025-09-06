@@ -263,7 +263,8 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
                 bettingOngoing = False
             else:
                 bettingOngoing = True
-    print("DO WE GET OUT OF THE BETTING PREPHASE")
+    print("Betting Pre flop completed. Current pot is $"+str(currentPot))
+    return currentPot
         
 def checkPlayersCanRespond(listOfPlayers):
     allPlayersCannotRespond=True
@@ -415,6 +416,9 @@ def dealCards(theCards, thePlayers, CurrentIndex):
         ActiveDeck.pop(cardIndex)
     return ActiveDeck, thePlayers
 
+def tolerancePhasePreFlop(listOfPlayers,dice):
+    print("Entering Tolerance Pre Flop Phase")
+
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
     currentPot=0
@@ -432,9 +436,9 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     seatedPlayers=peakCards(seatedPlayers)
     checkPlayerStat(seatedPlayers)
     #Start Betting Phase Preflop
-    bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
+    currentPot=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
-
+    tolerancePhasePreFlop(seatedPlayers,dice)
     #continue with betting phase flop
     #Start Rolling Phase flop
 
