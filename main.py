@@ -141,6 +141,40 @@ def initPot(listOfPlayers,smallBlind,bigBlind):
     print("Initialized pot is $"+str(thePot))
     return thePot
 
+def setSmallBlind(listOfPlayers):
+    print("Enter a value to set small blind")
+    tempBlind = input()
+    try:
+        validBlind = float(tempBlind)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return setSmallBlind(listOfPlayers)
+    for player in listOfPlayers:
+        if player.CurrentFunds - validBlind <= 0.0:
+            print("Not all players can afford the small blind, please pick a smaller blind")
+            return setSmallBlind(listOfPlayers)
+    return validBlind
+
+def setBigBlind(listOfPlayers,smallBlind):
+    print("Enter a value to set big blind")
+    tempBlind= input()
+    try:
+        validBlind = float(tempBlind)
+    except ValueError:
+        print("Invalid input, please enter a number. Press enter to continue")
+        input()
+        return setBigBlind(listOfPlayers,smallBlind)
+    if(validBlind <= smallBlind):
+        print("Enter a number bigger than the small blind. Press enter to continue")
+        input()
+        return setBigBlind(listOfPlayers,smallBlind)
+    for player in listOfPlayers:
+        if player.CurrentFunds - validBlind <= 0.0:
+            print("Not all players can afford the big blind, please pick a smaller blind. Press enter to continue")
+            input()
+            return setBigBlind(listOfPlayers,smallBlind)
+    return validBlind
+
 #Might have to create a updateBlindBet function when players decrease down to two and increase back up past two players
 def setBlindBets(listOfPlayers):
     bigBlind =-1
@@ -148,42 +182,12 @@ def setBlindBets(listOfPlayers):
     if(len(listOfPlayers) ==2):
         print("Only 2 players found, setting only one blind. Press Enter to continue")
         input()
-        print("Enter a value to set blind")
-        userInput = input()
-        try:#casting user input to a float as input is taken as a string by defualt
-            smallBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - smallBlind <= 0.0):
-                print("Not all players can afford blindbet, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
+        smallBlind=setSmallBlind(listOfPlayers)
     else:
         print("More than 2 players found. Setting up big and small blinds. Press Enter to continue")
         input()
-        print("Enter a value to set small blind")
-        userInput = input()
-        try:
-            smallBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - smallBlind <=0.0):
-                print("Not all players can afford the small blind, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
-        print("Enter a value to set big blind")
-        userInput= input()
-        try:
-            bigBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - bigBlind <=0.0):
-                print("Not all players can afford the big blind, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
+        smallBlind=setSmallBlind(listOfPlayers)
+        bigBlind= setBigBlind(listOfPlayers,smallBlind)
     return smallBlind, bigBlind
 
 def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
@@ -207,7 +211,9 @@ def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
             player.CurrentFunds -= validRaise
             break
         else:
-            pass
+            if player.HasFolded == False:
+                player.CanRespond == True
+                
     currentPot += validRaise
     return listOfPlayers, validRaise, currentPot
 
@@ -216,41 +222,59 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     currIndex = 0
     validMove=-1
     isMoveValid = True
+    bettingOngoing = True
     for player in listOfPlayers:
-        if(player.Name == theStarter.Name):
-            starterIndex = currIndex
-            break
+            if(player.Name == theStarter.Name):
+                starterIndex = currIndex
+                break
+            else:
+                currIndex +=1
+    while bettingOngoing:
+        for playerIndex in range(0, len(listOfPlayers)): 
+            currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
+            activePlayer = listOfPlayers[currentIndex]
+            if(activePlayer.HasFolded == False and activePlayer.CanRespond==True):
+                print("Player "+activePlayer.Name+" Enter 1(Call) 2(Raise) or 3(Fold)")
+                playerMove= input()
+                try:
+                    validMove= int(playerMove)
+                except ValueError:
+                    print("Invalid input, please enter a number 1-3")
+                    isMoveValid = False
+                    break
+                if(validMove < 0 or validMove > 3):
+                    print("Invalid input, please enter a number 1-3")
+                    isMoveValid = False
+                    break
+                if(validMove == 1):
+                    print("Player "+activePlayer.Name+" chose to call!")
+                    currentPot=activePlayer.callBet(bigBlind,currentPot)
+                    print("Current pot is $"+str(currentPot))
+                elif(validMove==2):
+                    print("Player "+activePlayer.Name+" chose to Raise!")
+                    listOfPlayers, bigBlind, currentPot= playerRaise(listOfPlayers,activePlayer,bigBlind,currentPot)
+                    print("Current pot is $"+str(currentPot))
+                else:
+                    print("Player "+activePlayer.Name+" chose to Fold!")
+                    activePlayer.foldBet()
+            else:
+                pass
+            whileLoopChecker=checkPlayersCanRespond(listOfPlayers)
+            if(whileLoopChecker == True):
+                bettingOngoing = False
+            else:
+                bettingOngoing = True
+    print("DO WE GET OUT OF THE BETTING PREPHASE")
+        
+def checkPlayersCanRespond(listOfPlayers):
+    allPlayersCannotRespond=True
+    for player in listOfPlayers:
+        if player.CanRespond == False:
+            continue
         else:
-            currIndex +=1
-    for playerIndex in range(0, len(listOfPlayers)): 
-        currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
-        activePlayer = listOfPlayers[currentIndex]
-        print("Player "+activePlayer.Name+" Enter 1(Call) 2(Raise) or 3(Fold)")
-        playerMove= input()
-        try:
-            validMove= int(playerMove)
-        except ValueError:
-            print("Invalid input, please enter a number 1-3")
-            isMoveValid = False
+            allPlayersCannotRespond = False
             break
-        if(validMove < 0 or validMove > 3):
-            print("Invalid input, please enter a number 1-3")
-            isMoveValid = False
-            break
-        if(validMove == 1):
-            print("Player "+activePlayer.Name+" chose to call!")
-            currentPot=activePlayer.callBet(bigBlind,currentPot)
-            print("Current pot is $"+str(currentPot))
-        elif(validMove==2):
-            print("Player "+activePlayer.Name+" chose to Raise!")
-            listOfPlayers, bigBlind, currentPot= playerRaise(listOfPlayers,activePlayer,bigBlind,currentPot)
-            print("Current pot is $"+str(currentPot))
-        else:
-            print("Player "+activePlayer.Name+" chose to Fold!")
-    if isMoveValid == True:
-        print("We get to do something")
-    else:
-        bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot)
+    return allPlayersCannotRespond
 
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
@@ -405,10 +429,10 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
         currentDealer,currentStarter,startingIndex,seatedPlayers=findCurrentDealerStarter(roundNumber,seatedPlayers,-1)
     cardsPostDeal,seatedPlayers=dealerShuffleDealCards(cards,currentDealer,seatedPlayers,startingIndex)
     #Init the pot with blind bets "posting blinds"
-    currentPot=initPot(seatedPlayers,bigBlind,smallBlind)
+    currentPot=initPot(seatedPlayers,smallBlind,bigBlind)
     #Let Players look at thier cards
     seatedPlayers=peakCards(seatedPlayers)
-    #checkPlayerStat(seatedPlayers)
+    checkPlayerStat(seatedPlayers)
     #Start Betting Phase Preflop
     bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
@@ -465,6 +489,8 @@ class Player:
         self.CurrentCardTwo = -1
         self.CurrentSmall = False
         self.CurrentBig = False
+        self.HasFolded = False
+        self.CanRespond = True
 
     def checkStat(self):
         print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
@@ -472,7 +498,12 @@ class Player:
     def callBet(self,currentBet, currentPot):
         self.CurrentFunds -= currentBet
         currentPot += currentBet
+        self.CanRespond = False
         return currentPot
+    
+    def foldBet(self):
+        self.HasFolded = True
+        self.CanRespond = False
 
     def RollPhase():
         pass
