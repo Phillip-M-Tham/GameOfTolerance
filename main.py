@@ -198,22 +198,21 @@ def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
         validRaise= float(tempRaise)
     except ValueError:
         print("Invalid input, please enter a float")
-        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+        return playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
     if validRaise <= currentBet:
         print("Raise is less than or equal to current max bet, please try again")
-        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+        return playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
     if currentPlayer.CurrentFunds - validRaise <= 0.0:
         #this only checks against current player, might want to check against all players funds
         print("Raise is bigger than player's current funds, please try again")
-        playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
+        return playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot)
     for player in listOfPlayers:
         if player.Name == currentPlayer.Name:
             player.CurrentFunds -= validRaise
-            break
+            player.CanRespond =False
         else:
             if player.HasFolded == False:
-                player.CanRespond == True
-                
+                player.CanRespond = True       
     currentPot += validRaise
     return listOfPlayers, validRaise, currentPot
 
@@ -269,11 +268,10 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
 def checkPlayersCanRespond(listOfPlayers):
     allPlayersCannotRespond=True
     for player in listOfPlayers:
-        if player.CanRespond == False:
-            continue
-        else:
+        if player.CanRespond == True:
             allPlayersCannotRespond = False
             break
+    print("all players cannot respond checker "+str(allPlayersCannotRespond))
     return allPlayersCannotRespond
 
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
