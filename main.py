@@ -141,6 +141,40 @@ def initPot(listOfPlayers,smallBlind,bigBlind):
     print("Initialized pot is $"+str(thePot))
     return thePot
 
+def setSmallBlind(listOfPlayers):
+    print("Enter a value to set small blind")
+    tempBlind = input()
+    try:
+        validBlind = float(tempBlind)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return setSmallBlind(listOfPlayers)
+    for player in listOfPlayers:
+        if player.CurrentFunds - validBlind <= 0.0:
+            print("Not all players can afford the small blind, please pick a smaller blind")
+            return setSmallBlind(listOfPlayers)
+    return validBlind
+
+def setBigBlind(listOfPlayers,smallBlind):
+    print("Enter a value to set big blind")
+    tempBlind= input()
+    try:
+        validBlind = float(tempBlind)
+    except ValueError:
+        print("Invalid input, please enter a number. Press enter to continue")
+        input()
+        return setBigBlind(listOfPlayers,smallBlind)
+    if(validBlind <= smallBlind):
+        print("Enter a number bigger than the small blind. Press enter to continue")
+        input()
+        return setBigBlind(listOfPlayers,smallBlind)
+    for player in listOfPlayers:
+        if player.CurrentFunds - validBlind <= 0.0:
+            print("Not all players can afford the big blind, please pick a smaller blind. Press enter to continue")
+            input()
+            return setBigBlind(listOfPlayers,smallBlind)
+    return validBlind
+
 #Might have to create a updateBlindBet function when players decrease down to two and increase back up past two players
 def setBlindBets(listOfPlayers):
     bigBlind =-1
@@ -148,42 +182,12 @@ def setBlindBets(listOfPlayers):
     if(len(listOfPlayers) ==2):
         print("Only 2 players found, setting only one blind. Press Enter to continue")
         input()
-        print("Enter a value to set blind")
-        userInput = input()
-        try:#casting user input to a float as input is taken as a string by defualt
-            smallBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - smallBlind <= 0.0):
-                print("Not all players can afford blindbet, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
+        smallBlind=setSmallBlind(listOfPlayers)
     else:
         print("More than 2 players found. Setting up big and small blinds. Press Enter to continue")
         input()
-        print("Enter a value to set small blind")
-        userInput = input()
-        try:
-            smallBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - smallBlind <=0.0):
-                print("Not all players can afford the small blind, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
-        print("Enter a value to set big blind")
-        userInput= input()
-        try:
-            bigBlind = float(userInput)
-        except ValueError:
-            print("Invalid input, please enter a number")
-            setBlindBets(listOfPlayers)
-        for player in listOfPlayers:
-            if(player.CurrentFunds - bigBlind <=0.0):
-                print("Not all players can afford the big blind, please pick a smaller blind")
-                setBlindBets(listOfPlayers)
+        smallBlind=setSmallBlind(listOfPlayers)
+        bigBlind= setBigBlind(listOfPlayers,smallBlind)
     return smallBlind, bigBlind
 
 def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
