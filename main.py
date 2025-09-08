@@ -272,14 +272,15 @@ def checkPlayersCanRespond(listOfPlayers):
         if player.CanRespond == True:
             allPlayersCannotRespond = False
             break
-    print("all players cannot respond checker "+str(allPlayersCannotRespond))
+        else:
+            continue
+    #print("all players cannot respond checker "+str(allPlayersCannotRespond))
     return allPlayersCannotRespond
 
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
     starterIndex = -1
     currIndex = 0
-    #currentPot= 0.0
     #This does not account for list of players with the same name
     for player in listOfPlayers:
         if(player.Name == theStarter.Name):
@@ -416,8 +417,61 @@ def dealCards(theCards, thePlayers, CurrentIndex):
         ActiveDeck.pop(cardIndex)
     return ActiveDeck, thePlayers
 
+def initTolerance(currentPlayer,listOfPlayers):
+    print("Player "+currentPlayer.Name+" Enter Y or N to participate in acquiring Tolerance")
+    temp = input()
+    if(temp == "Y"):
+        print("player needs to choose Tolerance number")
+        currentPlayer.PassTolerance=False
+    elif(temp == "N"):
+        print("player "+currentPlayer.Name+" chose to pass")
+        currentPlayer.PassTolerance=True
+    else:
+        print("input is not a valid response try again")
+        return initTolerance(currentPlayer,listOfPlayers)
+    #update list of players to have tolerance flags set based on player input
+    for player in listOfPlayers:
+        if currentPlayer.Name == player.Name and currentPlayer.PassTolerance == False:
+            player.PassTolerance = False
+            break
+        else:
+            continue
+    return listOfPlayers
+def setTolerance(activePlayer):
+    print("Player "+activePlayer.Name+" Enter a number 1-10 to set your tolerance number")
+    temp=input()
+    try:
+        validInput = int(temp)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return setTolerance(activePlayer)
+    if( validInput <= 0 or validInput >=11):
+        print("Number must be from 1-10")
+        return setTolerance(activePlayer)
+    return validInput
+
+def calcTolerance(rolledValue, player):
+    if(rolledValue >= player.CurrentTolerance):
+        print("player"+player.Name+"should gain "+str(player.CurrentTolerance)+" points")
+        player.CurrentPoints += player.CurrentTolerance
+    else:
+        print("player"+player.Name+"should lose "+str(player.CurrentTolerance)+" points")
+        player.CurrentPoints -= player.CurrentTolerance
+    return player
+
 def tolerancePhasePreFlop(listOfPlayers,dice):
     print("Entering Tolerance Pre Flop Phase")
+    for player in listOfPlayers:
+        listOfPlayers=initTolerance(player,listOfPlayers)
+    for player in listOfPlayers:
+        if player.PassTolerance == False:
+            player.CurrentTolerance= setTolerance(player)
+            #player.checkStat()
+            rolledValue=rollDice(dice, player)
+            player = calcTolerance(rolledValue,player)
+            player.checkStat()
+        else:
+            continue
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -493,6 +547,7 @@ class Player:
         self.CurrentBig = False
         self.HasFolded = False
         self.CanRespond = True
+        self.PassTolerance = False
 
     def checkStat(self):
         print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
@@ -524,11 +579,12 @@ def printDeck(deckOfCards, numberOfCards):
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
 
-def rollDice(dice):
+def rollDice(dice, currentPlayer):
     current_time = time.time()
     random.seed(current_time)
     pickedSideOne = random.choice(dice.diceOne)
-    print(f"Rolled dice one:{pickedSideOne}")
+    print("Player "+currentPlayer.Name+" Rolled dice one:"+str(pickedSideOne)+" Tolerance: "+str(currentPlayer.CurrentTolerance))
+    return pickedSideOne
 
 def initDice():
     theDice = Dice()
@@ -556,10 +612,10 @@ def initDecks():
         numOfPlayers = int(userinput)
     except ValueError:
         print("Invalid input, please enter a number")
-        initDecks()
+        return initDecks()
     if numOfPlayers > 10 or numOfPlayers <= 1: #check if user put in valid numbers if cast was successful
         print("Invalid input, please enter a valid number between 2 and 10")
-        initDecks()
+        return initDecks()
     print("number of players is "+str(numOfPlayers))
     decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
     print("Number of decks is "+str(decksNeeded))
