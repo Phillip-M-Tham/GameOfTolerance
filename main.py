@@ -241,7 +241,7 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
                     print("Invalid input, please enter a number 1-3")
                     isMoveValid = False
                     break
-                if(validMove < 0 or validMove > 3):
+                if(validMove <= 0 or validMove > 3):
                     print("Invalid input, please enter a number 1-3")
                     isMoveValid = False
                     break
@@ -274,59 +274,7 @@ def checkPlayersCanRespond(listOfPlayers):
             break
         else:
             continue
-    #print("all players cannot respond checker "+str(allPlayersCannotRespond))
     return allPlayersCannotRespond
-
-def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
-    #find the starters index in the list of players
-    starterIndex = -1
-    currIndex = 0
-    #This does not account for list of players with the same name
-    for player in listOfPlayers:
-        if(player.Name == theStarter.Name):
-            starterIndex = currIndex
-            break
-        else:
-            currIndex +=1
-    if starterIndex != -1:
-        if len(listOfPlayers) == 2:
-            for playerIndex in range(0,len(listOfPlayers)):
-                currentIndex = (starterIndex + playerIndex) % len(listOfPlayers)
-                activePlayer = listOfPlayers[currentIndex]
-                if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmall == True):
-                    print("Player "+activePlayer.Name+" is the current Starter")
-                    print("player "+activePlayer.Name+" press Enter to initialize blind bet")
-                    input()
-                    print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
-                    activePlayer.CurrentFunds -= smallBlind
-                    currentPot += smallBlind
-                    print("Current Pot is "+str(currentPot))
-                else:
-                    pass
-        else:
-           #more than 2 players puts both blinds in play
-            for playerIndex in range(0, len(listOfPlayers)): 
-                currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
-                activePlayer = listOfPlayers[currentIndex]
-                if(activePlayer.CurrentStarter == True and activePlayer.CurrentSmall ==True):
-                    print("Player "+activePlayer.Name+" is the current Starter")
-                    print("Player "+activePlayer.Name+" press any key to initialize blind bet")
-                    input()
-                    print("Player"+activePlayer.Name+" is the current Small Blind")
-                    print("Player "+activePlayer.Name+" deducted $"+str(smallBlind)+" from current funds")
-                    activePlayer.CurrentFunds -= smallBlind
-                    currentPot += smallBlind
-                    print("Current Pot is $"+str(currentPot))
-                elif(activePlayer.CurrentBig == True):
-                    print("Player "+activePlayer.Name+" is the current Big Blind")
-                    print("Player "+activePlayer.Name+" deducted $"+str(bigBlind)+" from current funds")
-                    activePlayer.CurrentFunds -=bigBlind
-                    currentPot += bigBlind
-                    print("Current Pot is $"+str(currentPot))
-                else:
-                    pass
-    else:
-        print("Error, unable to find matching name between list of players and set Starter Player name")  
 
 def updateThePlayers(listOfPlayers,dealer,starter,bigBlind):
     if bigBlind == None:
@@ -452,10 +400,10 @@ def setTolerance(activePlayer):
 
 def calcTolerance(rolledValue, player):
     if(rolledValue >= player.CurrentTolerance):
-        print("player"+player.Name+"should gain "+str(player.CurrentTolerance)+" points")
+        print("player "+player.Name+" should gain "+str(player.CurrentTolerance)+" points")
         player.CurrentPoints += player.CurrentTolerance
     else:
-        print("player"+player.Name+"should lose "+str(player.CurrentTolerance)+" points")
+        print("player "+player.Name+" should lose "+str(player.CurrentTolerance)+" points")
         player.CurrentPoints -= player.CurrentTolerance
     return player
 
@@ -472,6 +420,12 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
             player.checkStat()
         else:
             continue
+
+def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
+    print("Entering betting Flop phase")
+    print("Current pot is $"+str(thePot))
+    for player in thePlayers:
+        player.checkStat()
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -494,6 +448,7 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #Start Rolling Phase Preflop
     tolerancePhasePreFlop(seatedPlayers,dice)
     #continue with betting phase flop
+    currentPot=bettingPhaseFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase flop
 
     #end with betting phase turn(Tolerance only has 3 rounds of betting)
@@ -583,7 +538,7 @@ def rollDice(dice, currentPlayer):
     current_time = time.time()
     random.seed(current_time)
     pickedSideOne = random.choice(dice.diceOne)
-    print("Player "+currentPlayer.Name+" Rolled dice one:"+str(pickedSideOne)+" Tolerance: "+str(currentPlayer.CurrentTolerance))
+    print("Player "+currentPlayer.Name+" Rolled dice: "+str(pickedSideOne)+" Tolerance: "+str(currentPlayer.CurrentTolerance))
     return pickedSideOne
 
 def initDice():
