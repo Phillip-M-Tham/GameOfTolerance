@@ -272,14 +272,15 @@ def checkPlayersCanRespond(listOfPlayers):
         if player.CanRespond == True:
             allPlayersCannotRespond = False
             break
-    print("all players cannot respond checker "+str(allPlayersCannotRespond))
+        else:
+            continue
+    #print("all players cannot respond checker "+str(allPlayersCannotRespond))
     return allPlayersCannotRespond
 
 def initBettingPhase(listOfPlayers,theStarter,smallBlind,bigBlind,currentPot):
     #find the starters index in the list of players
     starterIndex = -1
     currIndex = 0
-    #currentPot= 0.0
     #This does not account for list of players with the same name
     for player in listOfPlayers:
         if(player.Name == theStarter.Name):
@@ -416,8 +417,38 @@ def dealCards(theCards, thePlayers, CurrentIndex):
         ActiveDeck.pop(cardIndex)
     return ActiveDeck, thePlayers
 
+def initTolerance(currentPlayer,listOfPlayers):
+    print("Player "+currentPlayer.Name+" Enter Y or N to participate in acquiring Tolerance")
+    temp = input()
+    if(temp == "Y"):
+        print("player needs to choose Tolerance number")
+        currentPlayer.PassTolerance=False
+    elif(temp == "N"):
+        print("player chose to pass")
+        currentPlayer.PassTolerance=True
+    else:
+        print("input is not a valid response try again")
+        return initTolerance(currentPlayer,listOfPlayers)
+    #update list of players to have tolerance flags set based on player input
+    for player in listOfPlayers:
+        if currentPlayer.Name == player.Name and currentPlayer.PassTolerance == False:
+            player.PassTolerance = False
+            break
+        else:
+            continue
+    return listOfPlayers
+
+
 def tolerancePhasePreFlop(listOfPlayers,dice):
     print("Entering Tolerance Pre Flop Phase")
+    for player in listOfPlayers:
+        listOfPlayers=initTolerance(player,listOfPlayers)
+    for player in listOfPlayers:
+        if player.PassTolerance == False:
+            print("Player "+player.Name+" is deciding thier tolerance number")
+        else:
+            continue
+    print("test")
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -493,6 +524,7 @@ class Player:
         self.CurrentBig = False
         self.HasFolded = False
         self.CanRespond = True
+        self.PassTolerance = False
 
     def checkStat(self):
         print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
