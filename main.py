@@ -221,7 +221,6 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     currIndex = 0
     validMove=-1
     maxBet = bigBlind
-    #isMoveValid = True
     bettingOngoing = True
     for player in listOfPlayers:
             if(player.Name == theStarter.Name):
@@ -265,8 +264,11 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     print("Betting Pre flop completed. Current pot is $"+str(currentPot))
     return currentPot, maxBet
         
-def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
-    print("Entering betting Flop phase current bet is "+str(currentBet))
+def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
+    if(thePhase ==1):
+        print("Entering betting Flop phase current bet is "+str(currentBet))
+    elif(thePhase ==2):
+        print("Entering betting River phase current bet is "+str(currentBet))
     hasChecked = False
     starterIndex = -1
     currIndex = 0
@@ -518,14 +520,14 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #reset the players can respond flags after each rolling phase
     seatedPlayers=resetPlayers(seatedPlayers)
     #continue with betting phase flop
-    currentPot,maxBet=bettingPhaseFlop(seatedPlayers,currentStarter,maxBet,currentPot)
+    currentPot,maxBet=bettingPhasePostFlop(seatedPlayers,currentStarter,maxBet,currentPot,1)
     #Start Rolling Phase flop
     tolerancePhase(seatedPlayers,dice,2)
     #reset the players can respond flag
     seatedPlayers =resetPlayers(seatedPlayers)
     #end with betting phase turn(Tolerance only has 3 rounds of betting)
-    
-
+    currentPot,maxBet=bettingPhasePostFlop(seatedPlayers,currentStarter,maxBet,currentPot,2)
+    tolerancePhase(seatedPlayers,dice,3)
     #currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
     #Increment Round after the end of all phases in a round
     roundNumber+=1
