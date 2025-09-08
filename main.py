@@ -450,6 +450,15 @@ def setTolerance(activePlayer):
         return setTolerance(activePlayer)
     return validInput
 
+def calcTolerance(rolledValue, player):
+    if(rolledValue >= player.CurrentTolerance):
+        print("player"+player.Name+"should gain "+str(player.CurrentTolerance)+" points")
+        player.CurrentPoints += player.CurrentTolerance
+    else:
+        print("player"+player.Name+"should lose "+str(player.CurrentTolerance)+" points")
+        player.CurrentPoints -= player.CurrentTolerance
+    return player
+
 def tolerancePhasePreFlop(listOfPlayers,dice):
     print("Entering Tolerance Pre Flop Phase")
     for player in listOfPlayers:
@@ -457,6 +466,9 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
     for player in listOfPlayers:
         if player.PassTolerance == False:
             player.CurrentTolerance= setTolerance(player)
+            #player.checkStat()
+            rolledValue=rollDice(dice, player)
+            player = calcTolerance(rolledValue,player)
             player.checkStat()
         else:
             continue
@@ -567,11 +579,12 @@ def printDeck(deckOfCards, numberOfCards):
             else:
                 print(f"IndexError for card {cards}: suit index {suit}")
 
-def rollDice(dice):
+def rollDice(dice, currentPlayer):
     current_time = time.time()
     random.seed(current_time)
     pickedSideOne = random.choice(dice.diceOne)
-    print(f"Rolled dice one:{pickedSideOne}")
+    print("Player "+currentPlayer.Name+" Rolled dice one:"+str(pickedSideOne)+" Tolerance: "+str(currentPlayer.CurrentTolerance))
+    return pickedSideOne
 
 def initDice():
     theDice = Dice()
