@@ -220,6 +220,7 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     starterIndex = -1
     currIndex = 0
     validMove=-1
+    maxBet = bigBlind
     #isMoveValid = True
     bettingOngoing = True
     for player in listOfPlayers:
@@ -245,11 +246,11 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
                     break
                 if(validMove == 1):
                     print("Player "+activePlayer.Name+" chose to call!")
-                    currentPot=activePlayer.callBet(bigBlind,currentPot)
+                    currentPot=activePlayer.callBet(maxBet,currentPot)
                     print("Current pot is $"+str(currentPot))
                 elif(validMove==2):
                     print("Player "+activePlayer.Name+" chose to Raise!")
-                    listOfPlayers, bigBlind, currentPot= playerRaise(listOfPlayers,activePlayer,bigBlind,currentPot)
+                    listOfPlayers, maxBet, currentPot= playerRaise(listOfPlayers,activePlayer,maxBet,currentPot)
                     print("Current pot is $"+str(currentPot))
                 else:
                     print("Player "+activePlayer.Name+" chose to Fold!")
@@ -262,10 +263,10 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
             else:
                 bettingOngoing = True
     print("Betting Pre flop completed. Current pot is $"+str(currentPot))
-    return currentPot
+    return currentPot, maxBet
         
 def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
-    print("Entering betting Flop phase")
+    print("Entering betting Flop phase current bet is "+str(currentBet))
     hasChecked = False
     starterIndex = -1
     currIndex = 0
@@ -300,7 +301,7 @@ def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
                     print("Current pot is $"+str(thePot))  
                 elif(validMove == 2):
                     print("Player "+activePlayer.Name+" chose to Raise!")
-                    listOfPlayers, bigBlind, thePot= playerRaise(listOfPlayers,activePlayer,bigBlind,thePot)
+                    thePlayers, currentBet, thePot= playerRaise(thePlayers,activePlayer,currentBet,thePot)
                     print("Current pot is $"+str(thePot))
                     hasChecked = True
                 elif(validMove == 3):
@@ -308,11 +309,12 @@ def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
                     print("Player chose to Fold")
                     activePlayer.foldBet()
                 else:
-                    print("Player chose to check")
+                    print("Player "+activePlayer.Name+" chose to check!")
                     if(hasChecked == False):
-                        print("Player can check")
+                        print("Player"+activePlayer.Name+" can check!")
+                        activePlayer.checkBet()
                     else:
-                        print("Player should not be able to check")
+                        print("Player"+activePlayer.Name+" should not be able to check")
                         break
             else:
                 pass
@@ -324,7 +326,7 @@ def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
     print("Betting flop completed. Current pot is $"+str(thePot))
     for player in thePlayers:
         player.checkStat()
-    return thePot
+    return thePot, currentBet
 
 def checkPlayersCanRespond(listOfPlayers):
     allPlayersCannotRespond=True
@@ -504,13 +506,15 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     seatedPlayers=peakCards(seatedPlayers)
     checkPlayerStat(seatedPlayers)
     #Start Betting Phase Preflop
-    currentPot=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
+    currentPot,maxBet=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
     tolerancePhasePreFlop(seatedPlayers,dice)
     #reset the players can respond flags after each rolling phase
     seatedPlayers=resetPlayers(seatedPlayers)
     #continue with betting phase flop
-    currentPot=bettingPhaseFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
+    currentPot,maxBet=bettingPhaseFlop(seatedPlayers,currentStarter,maxBet,currentPot)
+    #reset the players can respond flag
+    seatedPlayers =resetPlayers(seatedPlayers)
     #Start Rolling Phase flop
 
     #end with betting phase turn(Tolerance only has 3 rounds of betting)
@@ -565,6 +569,7 @@ class Player:
         self.HasFolded = False
         self.CanRespond = True
         self.PassTolerance = False
+        self.HasChecked = False
 
     def checkStat(self):
         print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} Respond: {self.CanRespond} Folded: {self.HasFolded} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
@@ -577,6 +582,10 @@ class Player:
     
     def foldBet(self):
         self.HasFolded = True
+        self.CanRespond = False
+    
+    def checkBet(self):
+        self.HasChecked = True
         self.CanRespond = False
 
     def RollPhase():
