@@ -220,7 +220,7 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     starterIndex = -1
     currIndex = 0
     validMove=-1
-    isMoveValid = True
+    #isMoveValid = True
     bettingOngoing = True
     for player in listOfPlayers:
             if(player.Name == theStarter.Name):
@@ -239,11 +239,9 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
                     validMove= int(playerMove)
                 except ValueError:
                     print("Invalid input, please enter a number 1-3")
-                    isMoveValid = False
                     break
                 if(validMove <= 0 or validMove > 3):
                     print("Invalid input, please enter a number 1-3")
-                    isMoveValid = False
                     break
                 if(validMove == 1):
                     print("Player "+activePlayer.Name+" chose to call!")
@@ -266,6 +264,68 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     print("Betting Pre flop completed. Current pot is $"+str(currentPot))
     return currentPot
         
+def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
+    print("Entering betting Flop phase")
+    hasChecked = False
+    starterIndex = -1
+    currIndex = 0
+    validMove=-1
+    bettingOnGoing = True
+    for player in thePlayers:
+            if(player.Name == theStarter.Name):
+                starterIndex = currIndex
+                break
+            else:
+                currIndex +=1
+    print("Current pot is $"+str(thePot))
+    while bettingOnGoing:
+        for playerIndex in range(0,len(thePlayers)):
+            currIndex= (starterIndex + playerIndex) % len(thePlayers)
+            activePlayer = thePlayers[currIndex]
+            if(activePlayer.HasFolded == False and activePlayer.CanRespond == True):
+                print("Player "+activePlayer.Name+" Enter 1(Call) 2(Raise) 3(Fold) or 4(Check)")
+                playerMove = input()
+                try:
+                    validMove=int(playerMove)
+                except ValueError:
+                    print("Invalid input, please enter a number 1-4")
+                    break
+                if(validMove <= 0 or validMove >=5):
+                    print("Invalid input, please enter a number 1-4")
+                    break
+                if(validMove == 1):
+                    print("Player "+activePlayer.Name+" chose to Call!")
+                    thePot = activePlayer.callBet(currentBet,thePot)
+                    hasChecked = True
+                    print("Current pot is $"+str(thePot))  
+                elif(validMove == 2):
+                    print("Player "+activePlayer.Name+" chose to Raise!")
+                    listOfPlayers, bigBlind, thePot= playerRaise(listOfPlayers,activePlayer,bigBlind,thePot)
+                    print("Current pot is $"+str(thePot))
+                    hasChecked = True
+                elif(validMove == 3):
+                    print("Player "+activePlayer.Name+" chose to Fold!")
+                    print("Player chose to Fold")
+                    activePlayer.foldBet()
+                else:
+                    print("Player chose to check")
+                    if(hasChecked == False):
+                        print("Player can check")
+                    else:
+                        print("Player should not be able to check")
+                        break
+            else:
+                pass
+            whileLoopChecker=checkPlayersCanRespond(thePlayers)
+            if(whileLoopChecker == True):
+                bettingOnGoing = False
+            else:
+                bettingOnGoing = True
+    print("Betting flop completed. Current pot is $"+str(thePot))
+    for player in thePlayers:
+        player.checkStat()
+    return thePot
+
 def checkPlayersCanRespond(listOfPlayers):
     allPlayersCannotRespond=True
     for player in listOfPlayers:
@@ -414,18 +474,18 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
     for player in listOfPlayers:
         if player.PassTolerance == False:
             player.CurrentTolerance= setTolerance(player)
-            #player.checkStat()
             rolledValue=rollDice(dice, player)
             player = calcTolerance(rolledValue,player)
             player.checkStat()
         else:
             continue
-
-def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
-    print("Entering betting Flop phase")
-    print("Current pot is $"+str(thePot))
-    for player in thePlayers:
-        player.checkStat()
+def resetPlayers(listOfPlayers):
+    for player in listOfPlayers:
+        if(player.HasFolded == False):
+            player.CanRespond = True
+        else:
+            continue
+    return listOfPlayers
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -447,6 +507,8 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     currentPot=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
     tolerancePhasePreFlop(seatedPlayers,dice)
+    #reset the players can respond flags after each rolling phase
+    seatedPlayers=resetPlayers(seatedPlayers)
     #continue with betting phase flop
     currentPot=bettingPhaseFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase flop
@@ -459,7 +521,7 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     roundNumber+=1
 
 #TODOS:
-#***create a function that resets all players currentDealer boolean after each round
+#***create a function that resets all players current boolean flags after each round
 #***create a function that updates the currentDealerIndex
 def shuffleDeck(cards):
     current_time = time.time()
@@ -505,7 +567,7 @@ class Player:
         self.PassTolerance = False
 
     def checkStat(self):
-        print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
+        print(f"Player {self.Name} Age:{self.Age} Tolerance: {self.CurrentTolerance} Points: {self.CurrentPoints} Funds: ${self.CurrentFunds} Eldest: {self.IsEldest} Dealer: {self.CurrentDealer} Starter: {self.CurrentStarter} Respond: {self.CanRespond} Folded: {self.HasFolded} CardOne: {self.CurrentCardOne} CardTwo: {self.CurrentCardTwo} SmallBlind: {self.CurrentSmall} BigBlind: {self.CurrentBig}")
 
     def callBet(self,currentBet, currentPot):
         self.CurrentFunds -= currentBet
