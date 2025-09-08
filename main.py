@@ -424,7 +424,7 @@ def initTolerance(currentPlayer,listOfPlayers):
         print("player needs to choose Tolerance number")
         currentPlayer.PassTolerance=False
     elif(temp == "N"):
-        print("player chose to pass")
+        print("player "+currentPlayer.Name+" chose to pass")
         currentPlayer.PassTolerance=True
     else:
         print("input is not a valid response try again")
@@ -437,7 +437,18 @@ def initTolerance(currentPlayer,listOfPlayers):
         else:
             continue
     return listOfPlayers
-
+def setTolerance(activePlayer):
+    print("Player "+activePlayer.Name+" Enter a number 1-10 to set your tolerance number")
+    temp=input()
+    try:
+        validInput = int(temp)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return setTolerance(activePlayer)
+    if( validInput <= 0 or validInput >=11):
+        print("Number must be from 1-10")
+        return setTolerance(activePlayer)
+    return validInput
 
 def tolerancePhasePreFlop(listOfPlayers,dice):
     print("Entering Tolerance Pre Flop Phase")
@@ -445,10 +456,10 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
         listOfPlayers=initTolerance(player,listOfPlayers)
     for player in listOfPlayers:
         if player.PassTolerance == False:
-            print("Player "+player.Name+" is deciding thier tolerance number")
+            player.CurrentTolerance= setTolerance(player)
+            player.checkStat()
         else:
             continue
-    print("test")
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -588,10 +599,10 @@ def initDecks():
         numOfPlayers = int(userinput)
     except ValueError:
         print("Invalid input, please enter a number")
-        initDecks()
+        return initDecks()
     if numOfPlayers > 10 or numOfPlayers <= 1: #check if user put in valid numbers if cast was successful
         print("Invalid input, please enter a valid number between 2 and 10")
-        initDecks()
+        return initDecks()
     print("number of players is "+str(numOfPlayers))
     decksNeeded = math.ceil(numOfPlayers/5)#we use the ceiling function to round up to the decks needed
     print("Number of decks is "+str(decksNeeded))
