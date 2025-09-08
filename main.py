@@ -469,8 +469,13 @@ def calcTolerance(rolledValue, player):
         player.CurrentPoints -= player.CurrentTolerance
     return player
 
-def tolerancePhasePreFlop(listOfPlayers,dice):
-    print("Entering Tolerance Pre Flop Phase")
+def tolerancePhase(listOfPlayers,dice,phase):
+    if(phase == 1):
+        print("Entering Tolerance Pre Flop Phase")
+    elif(phase ==2):
+        print("Entering Tolerance Flop Phase")
+    else:
+        print("Entering Tolerance Final Phase")
     for player in listOfPlayers:
         listOfPlayers=initTolerance(player,listOfPlayers)
     for player in listOfPlayers:
@@ -481,6 +486,7 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
             player.checkStat()
         else:
             continue
+
 def resetPlayers(listOfPlayers):
     for player in listOfPlayers:
         if(player.HasFolded == False):
@@ -508,15 +514,15 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #Start Betting Phase Preflop
     currentPot,maxBet=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
-    tolerancePhasePreFlop(seatedPlayers,dice)
+    tolerancePhase(seatedPlayers,dice,1)
     #reset the players can respond flags after each rolling phase
     seatedPlayers=resetPlayers(seatedPlayers)
     #continue with betting phase flop
     currentPot,maxBet=bettingPhaseFlop(seatedPlayers,currentStarter,maxBet,currentPot)
+    #Start Rolling Phase flop
+    tolerancePhase(seatedPlayers,dice,2)
     #reset the players can respond flag
     seatedPlayers =resetPlayers(seatedPlayers)
-    #Start Rolling Phase flop
-
     #end with betting phase turn(Tolerance only has 3 rounds of betting)
     
 
