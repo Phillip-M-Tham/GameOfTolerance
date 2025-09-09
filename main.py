@@ -497,6 +497,18 @@ def resetPlayers(listOfPlayers):
             continue
     return listOfPlayers
 
+def calcWinner(listOfPlayers,currentPot):
+    maxPoints = 0
+    for player in listOfPlayers:
+        if player.CurrentPoints > maxPoints:
+            maxPoints = player.CurrentPoints
+    for player in listOfPlayers:
+        if player.CurrentPoints == maxPoints:
+            print("Player "+player.Name+" has won the round!")
+            player.CurrentFunds += currentPot
+    return listOfPlayers
+     
+
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
     currentPot=0
@@ -530,6 +542,7 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     tolerancePhase(seatedPlayers,dice,3)
     #currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
     #Increment Round after the end of all phases in a round
+    seatedPlayers = calcWinner(seatedPlayers,currentPot)
     roundNumber+=1
 
 #TODOS:
