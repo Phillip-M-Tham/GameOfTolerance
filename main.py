@@ -552,7 +552,11 @@ def continueRounds(roundNumber,seatedPlayers):
     input()
     clearTerminal()
     seatedPlayers= resetPlayerFlags(seatedPlayers)
-    #seatedPlayers= adjustPlayerCount(seatedPlayers)
+    seatedPlayers= adjustPlayerCount(seatedPlayers)
+
+def adjustPlayerCount(seatedPlayers):
+    print("Enter 1(Continue), 2(Add Player), 3(Remove Player), 4(Disband)")
+    
 
 def resetPlayerFlags(listOfPlayers):
     for player in listOfPlayers:
