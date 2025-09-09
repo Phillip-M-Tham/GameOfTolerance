@@ -502,9 +502,10 @@ def calcWinner(listOfPlayers,currentPot):
     for player in listOfPlayers:
         if player.CurrentPoints > maxPoints:
             maxPoints = player.CurrentPoints
+        player.checkStat()
     for player in listOfPlayers:
         if player.CurrentPoints == maxPoints:
-            print("Player "+player.Name+" has won the round!")
+            print("Player "+player.Name+" has won the round! Total pot is $"+str(currentPot))
             player.CurrentFunds += currentPot
     return listOfPlayers
      
@@ -544,6 +545,31 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #Increment Round after the end of all phases in a round
     seatedPlayers = calcWinner(seatedPlayers,currentPot)
     roundNumber+=1
+    continueRounds(roundNumber,seatedPlayers)
+
+def continueRounds(roundNumber,seatedPlayers):
+    print("Round is complete, resetting players flags for next round. Please enter to continue")
+    input()
+    clearTerminal()
+    seatedPlayers= resetPlayerFlags(seatedPlayers)
+    #seatedPlayers= adjustPlayerCount(seatedPlayers)
+
+def resetPlayerFlags(listOfPlayers):
+    for player in listOfPlayers:
+        player.CurrentTolerance = -1
+        player.CurrentPoints = 0
+        player.CurrentDealer = False
+        player.CurrentStarter = False
+        player.CurrentCardOne = -1
+        player.CurrentCardTwo = -1
+        player.CurrentSmall = False
+        player.CurrentBig = False
+        player.HasFolded = False
+        player.CanRespond = True
+        player.PassTolerance = False
+        player.HasChecked = False
+    return listOfPlayers
+
 
 #TODOS:
 #***create a function that resets all players current boolean flags after each round
@@ -608,11 +634,6 @@ class Player:
     def checkBet(self):
         self.HasChecked = True
         self.CanRespond = False
-
-    def RollPhase():
-        pass
-    def BettingPhase():
-        pass
 
 def printDeck(deckOfCards, numberOfCards):
      suites = ["Clubs", "Diamonds", "Hearts", "Spades"]
