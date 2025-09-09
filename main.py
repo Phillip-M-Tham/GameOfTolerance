@@ -221,7 +221,6 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     currIndex = 0
     validMove=-1
     maxBet = bigBlind
-    #isMoveValid = True
     bettingOngoing = True
     for player in listOfPlayers:
             if(player.Name == theStarter.Name):
@@ -265,8 +264,11 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     print("Betting Pre flop completed. Current pot is $"+str(currentPot))
     return currentPot, maxBet
         
-def bettingPhaseFlop(thePlayers,theStarter,currentBet,thePot):
-    print("Entering betting Flop phase current bet is "+str(currentBet))
+def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
+    if(thePhase ==1):
+        print("Entering betting Flop phase current bet is "+str(currentBet))
+    elif(thePhase ==2):
+        print("Entering betting River phase current bet is "+str(currentBet))
     hasChecked = False
     starterIndex = -1
     currIndex = 0
@@ -469,8 +471,13 @@ def calcTolerance(rolledValue, player):
         player.CurrentPoints -= player.CurrentTolerance
     return player
 
-def tolerancePhasePreFlop(listOfPlayers,dice):
-    print("Entering Tolerance Pre Flop Phase")
+def tolerancePhase(listOfPlayers,dice,phase):
+    if(phase == 1):
+        print("Entering Tolerance Pre Flop Phase")
+    elif(phase ==2):
+        print("Entering Tolerance Flop Phase")
+    else:
+        print("Entering Tolerance Final Phase")
     for player in listOfPlayers:
         listOfPlayers=initTolerance(player,listOfPlayers)
     for player in listOfPlayers:
@@ -481,6 +488,7 @@ def tolerancePhasePreFlop(listOfPlayers,dice):
             player.checkStat()
         else:
             continue
+
 def resetPlayers(listOfPlayers):
     for player in listOfPlayers:
         if(player.HasFolded == False):
@@ -488,6 +496,19 @@ def resetPlayers(listOfPlayers):
         else:
             continue
     return listOfPlayers
+
+def calcWinner(listOfPlayers,currentPot):
+    maxPoints = 0
+    for player in listOfPlayers:
+        if player.CurrentPoints > maxPoints:
+            maxPoints = player.CurrentPoints
+        player.checkStat()
+    for player in listOfPlayers:
+        if player.CurrentPoints == maxPoints:
+            print("Player "+player.Name+" has won the round! Total pot is $"+str(currentPot))
+            player.CurrentFunds += currentPot
+    return listOfPlayers
+     
 
 def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind, smallBlind):
     print(f"Welcome to round "+str(roundNumber))
@@ -508,21 +529,47 @@ def startRound(roundNumber,seatedPlayers,cards,dice,currentDealerIndex, bigBlind
     #Start Betting Phase Preflop
     currentPot,maxBet=bettingPhasePreFlop(seatedPlayers,currentStarter,bigBlind,currentPot)
     #Start Rolling Phase Preflop
-    tolerancePhasePreFlop(seatedPlayers,dice)
+    tolerancePhase(seatedPlayers,dice,1)
     #reset the players can respond flags after each rolling phase
     seatedPlayers=resetPlayers(seatedPlayers)
     #continue with betting phase flop
-    currentPot,maxBet=bettingPhaseFlop(seatedPlayers,currentStarter,maxBet,currentPot)
+    currentPot,maxBet=bettingPhasePostFlop(seatedPlayers,currentStarter,maxBet,currentPot,1)
+    #Start Rolling Phase flop
+    tolerancePhase(seatedPlayers,dice,2)
     #reset the players can respond flag
     seatedPlayers =resetPlayers(seatedPlayers)
-    #Start Rolling Phase flop
-
     #end with betting phase turn(Tolerance only has 3 rounds of betting)
-    
-
+    currentPot,maxBet=bettingPhasePostFlop(seatedPlayers,currentStarter,maxBet,currentPot,2)
+    tolerancePhase(seatedPlayers,dice,3)
     #currentPot=initBettingPhase(seatedPlayers,currentStarter,bigBlind,smallBlind,currentPot)
     #Increment Round after the end of all phases in a round
+    seatedPlayers = calcWinner(seatedPlayers,currentPot)
     roundNumber+=1
+    continueRounds(roundNumber,seatedPlayers)
+
+def continueRounds(roundNumber,seatedPlayers):
+    print("Round is complete, resetting players flags for next round. Please enter to continue")
+    input()
+    clearTerminal()
+    seatedPlayers= resetPlayerFlags(seatedPlayers)
+    #seatedPlayers= adjustPlayerCount(seatedPlayers)
+
+def resetPlayerFlags(listOfPlayers):
+    for player in listOfPlayers:
+        player.CurrentTolerance = -1
+        player.CurrentPoints = 0
+        player.CurrentDealer = False
+        player.CurrentStarter = False
+        player.CurrentCardOne = -1
+        player.CurrentCardTwo = -1
+        player.CurrentSmall = False
+        player.CurrentBig = False
+        player.HasFolded = False
+        player.CanRespond = True
+        player.PassTolerance = False
+        player.HasChecked = False
+    return listOfPlayers
+
 
 #TODOS:
 #***create a function that resets all players current boolean flags after each round
@@ -587,11 +634,6 @@ class Player:
     def checkBet(self):
         self.HasChecked = True
         self.CanRespond = False
-
-    def RollPhase():
-        pass
-    def BettingPhase():
-        pass
 
 def printDeck(deckOfCards, numberOfCards):
      suites = ["Clubs", "Diamonds", "Hearts", "Spades"]
