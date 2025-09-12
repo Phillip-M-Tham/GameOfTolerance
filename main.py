@@ -552,11 +552,22 @@ def continueRounds(roundNumber,seatedPlayers):
     input()
     clearTerminal()
     seatedPlayers= resetPlayerFlags(seatedPlayers)
+    print("Adjusting current list of players funds. Press enter to continue")
+    input()
+    clearTerminal()
+    seatedPlayers= adjustPlayerFunds(seatedPlayers)
+    print("Adjusting current list of players. Press enter to continue")
+    input()
+    clearTerminal()
     seatedPlayers= adjustPlayerCount(seatedPlayers)
 
 def adjustPlayerCount(seatedPlayers):
     print("Enter 1(Continue), 2(Add Player), 3(Remove Player), 4(Disband)")
-    
+
+
+def adjustPlayerFunds(listOfPlayers):
+    for player in listOfPlayers:
+        print("Player "+player.Name+" Enter 1 to Add funds to current funds. Current funds:$"+str(player.CurrentFunds))
 
 def resetPlayerFlags(listOfPlayers):
     for player in listOfPlayers:
