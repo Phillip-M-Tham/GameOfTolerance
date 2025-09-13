@@ -190,6 +190,15 @@ def setBlindBets(listOfPlayers):
         bigBlind= setBigBlind(listOfPlayers,smallBlind)
     return smallBlind, bigBlind
 
+def findValidResponders(listOfPlayers,currentPlayer):
+    for player in listOfPlayers:
+        if player.Name == currentPlayer.Name:
+            player.CanRespond =False
+        else:
+            if player.HasChecked == True and player.CanRespond == True :
+                player.CanRespond = True
+    return listOfPlayers
+
 def playerRaise(listOfPlayers,currentPlayer,currentBet,currentPot):
     validRaise=0.0
     print("Player "+currentPlayer.Name+" please enter raise larger than $"+str(currentBet))
@@ -223,11 +232,11 @@ def bettingPhasePreFlop(listOfPlayers,theStarter,bigBlind,currentPot):
     maxBet = bigBlind
     bettingOngoing = True
     for player in listOfPlayers:
-            if(player.Name == theStarter.Name):
-                starterIndex = currIndex
-                break
-            else:
-                currIndex +=1
+        if(player.Name == theStarter.Name):
+            starterIndex = currIndex
+            break
+        else:
+            currIndex +=1
     while bettingOngoing:
         for playerIndex in range(0, len(listOfPlayers)): 
             currentIndex=(starterIndex + playerIndex) % len(listOfPlayers)
@@ -285,7 +294,7 @@ def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
         for playerIndex in range(0,len(thePlayers)):
             currIndex= (starterIndex + playerIndex) % len(thePlayers)
             activePlayer = thePlayers[currIndex]
-            if(activePlayer.HasFolded == False and activePlayer.CanRespond == True):
+            if(activePlayer.HasFolded == False and activePlayer.CanRespond ==True):
                 print("Player "+activePlayer.Name+" Enter 1(Call) 2(Raise) 3(Fold) or 4(Check)")
                 playerMove = input()
                 try:
@@ -299,6 +308,7 @@ def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
                 if(validMove == 1):
                     print("Player "+activePlayer.Name+" chose to Call!")
                     thePot = activePlayer.callBet(currentBet,thePot)
+                    thePlayers = findValidResponders(thePlayers, activePlayer)
                     hasChecked = True
                     print("Current pot is $"+str(thePot))  
                 elif(validMove == 2):
@@ -308,12 +318,11 @@ def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
                     hasChecked = True
                 elif(validMove == 3):
                     print("Player "+activePlayer.Name+" chose to Fold!")
-                    print("Player chose to Fold")
                     activePlayer.foldBet()
                 else:
                     print("Player "+activePlayer.Name+" chose to check!")
                     if(hasChecked == False):
-                        print("Player"+activePlayer.Name+" can check!")
+                        print("Player "+activePlayer.Name+" can check!")
                         activePlayer.checkBet()
                     else:
                         print("Player"+activePlayer.Name+" should not be able to check")
@@ -331,14 +340,12 @@ def bettingPhasePostFlop(thePlayers,theStarter,currentBet,thePot,thePhase):
     return thePot, currentBet
 
 def checkPlayersCanRespond(listOfPlayers):
-    allPlayersCannotRespond=True
     for player in listOfPlayers:
         if player.CanRespond == True:
-            allPlayersCannotRespond = False
-            break
+            return False
         else:
             continue
-    return allPlayersCannotRespond
+    return True
 
 def updateThePlayers(listOfPlayers,dealer,starter,bigBlind):
     if bigBlind == None:
@@ -584,7 +591,6 @@ def resetPlayerFlags(listOfPlayers):
         player.PassTolerance = False
         player.HasChecked = False
     return listOfPlayers
-
 
 #TODOS:
 #***create a function that resets all players current boolean flags after each round
