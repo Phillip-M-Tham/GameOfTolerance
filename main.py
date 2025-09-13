@@ -571,10 +571,44 @@ def continueRounds(roundNumber,seatedPlayers):
 def adjustPlayerCount(seatedPlayers):
     print("Enter 1(Continue), 2(Add Player), 3(Remove Player), 4(Disband)")
 
+def addFunds(thePlayer):
+    print("Player "+thePlayer.Name+" Enter 1 to Add funds to current funds 2 to move on. Current funds:$"+str(thePlayer.CurrentFunds))
+    additionalFunds = 0.0
+    userInput = input()
+    try:
+        valid =  int(userInput)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return addFunds(thePlayer)
+    if valid <=0 or valid >=3:
+        print("Invalid number please choose either 1 or 2")
+        return addFunds(thePlayer)
+    if valid == 1:
+        additionalFunds = enterFunds(thePlayer)
+        return additionalFunds
+    else:
+        return additionalFunds
+        
+def enterFunds(thePlayer):
+    theFunds =0.0
+    print("Please enter how much you would like to add")
+    #cap players to add $1,000,000 after each round
+    userInput = input()
+    try:
+        theFunds = float(userInput)
+    except ValueError:
+        print("Invalid input, please enter a number")
+        return enterFunds(thePlayer)
+    if theFunds <= 0 or theFunds > 1000000:
+        print("Invalid number, please choose a number between 1.00 and 1,000,000.00 ")
+        return enterFunds(thePlayer)
+    return theFunds
 
 def adjustPlayerFunds(listOfPlayers):
     for player in listOfPlayers:
-        print("Player "+player.Name+" Enter 1 to Add funds to current funds. Current funds:$"+str(player.CurrentFunds))
+        addedFunds=addFunds(player)
+        player.CurrentFunds += addedFunds
+        print("Player "+player.Name+" added $"+str(addedFunds)+" Current Funds: $"+str(player.CurrentFunds))
 
 def resetPlayerFlags(listOfPlayers):
     for player in listOfPlayers:
